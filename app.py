@@ -98,7 +98,7 @@ def apply_theme() -> None:
         .stApp h4,
         .stApp h5,
         .stApp h6 {
-            color: #161512 !important;
+            color: #161512;
         }
 
         .stApp [data-baseweb="select"] *,
@@ -106,61 +106,61 @@ def apply_theme() -> None:
         .stApp [data-baseweb="textarea"] *,
         .stApp [data-baseweb="radio"] *,
         .stApp [data-baseweb="checkbox"] * {
-            color: #161512 !important;
+            color: #161512;
         }
 
         .stApp [data-baseweb="select"] > div,
         .stApp [data-baseweb="input"] > div,
         .stApp [data-baseweb="textarea"] > div {
-            background-color: #fffaf2 !important;
-            border: 1px solid rgba(138, 91, 61, 0.28) !important;
-            border-radius: 10px !important;
-            box-shadow: 0 1px 2px rgba(47, 79, 61, 0.08) !important;
+            background-color: #fffaf2;
+            border: 1px solid rgba(138, 91, 61, 0.28);
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(47, 79, 61, 0.08);
         }
 
         .stApp [data-baseweb="input"] > div:focus-within,
         .stApp [data-baseweb="textarea"] > div:focus-within,
         .stApp [data-baseweb="select"] > div:focus-within {
-            border-color: #5f7d4d !important;
-            box-shadow: 0 0 0 2px rgba(95, 125, 77, 0.18) !important;
+            border-color: #5f7d4d;
+            box-shadow: 0 0 0 2px rgba(95, 125, 77, 0.18);
         }
 
         [data-testid="stHeader"] {
-            background: #efe6d6 !important;
+            background: #efe6d6;
         }
 
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
         [data-testid="stDecoration"] {
-            color: #161512 !important;
+            color: #161512;
         }
 
         [data-testid="stHeader"] button,
         [data-testid="stToolbar"] button {
-            color: #161512 !important;
-            background: #fffaf2 !important;
-            border: 1px solid #cfb997 !important;
+            color: #161512 ;
+            background: #fffaf2 ;
+            border: 1px solid #cfb997 ;
         }
 
         [data-testid="stHeader"] button svg,
         [data-testid="stToolbar"] button svg,
         [data-testid="stHeader"] button svg path,
         [data-testid="stToolbar"] button svg path {
-            fill: #161512 !important;
-            stroke: #161512 !important;
+            fill: #161512 ;
+            stroke: #161512 ;
         }
 
         [data-testid="stHeader"] button *,
         [data-testid="stToolbar"] button * {
-            color: #161512 !important;
-            fill: #161512 !important;
-            stroke: #161512 !important;
+            color: #161512 ;
+            fill: #161512 ;
+            stroke: #161512 ;
         }
 
         [data-testid="stToolbar"] button {
-            background: #fffaf2 !important;
-            border: 1px solid #cfb997 !important;
-            color: #161512 !important;
+            background: #fffaf2 ;
+            border: 1px solid #cfb997 ;
+            color: #161512 ;
         }
 
         [data-testid="stSidebar"] {
@@ -168,26 +168,26 @@ def apply_theme() -> None:
         }
 
         [data-testid="stSidebar"] * {
-            color: #f4efe4 !important;
+            color: #f4efe4 ;
         }
 
         [data-testid="stSidebar"] [data-baseweb="select"] *,
         [data-testid="stSidebar"] [data-baseweb="input"] *,
         [data-testid="stSidebar"] [data-baseweb="textarea"] * {
-            color: #f4efe4 !important;
+            color: #f4efe4 ;
         }
 
         [data-testid="stSidebar"] [data-baseweb="input"] input,
         [data-testid="stSidebar"] [data-baseweb="input"] textarea,
         [data-testid="stSidebar"] [data-baseweb="textarea"] textarea {
-            color: #161512 !important;
-            -webkit-text-fill-color: #161512 !important;
-            caret-color: #161512 !important;
+            color: #161512 ;
+            -webkit-text-fill-color: #161512 ;
+            caret-color: #161512 ;
         }
 
         [data-testid="stSidebar"] [data-baseweb="input"] input::placeholder,
         [data-testid="stSidebar"] [data-baseweb="textarea"] textarea::placeholder {
-            color: #5a574f !important;
+            color: #5a574f ;
             opacity: 1;
         }
 
@@ -204,8 +204,8 @@ def apply_theme() -> None:
             margin: 0.5rem auto 0.9rem auto;
             padding: 0.4rem;
             border-radius: 16px;
-            background: linear-gradient(180deg, rgba(255, 250, 242, 0.86) 0%, rgba(251, 248, 241, 0.95) 100%);
-            border: 1px solid rgba(138, 91, 61, 0.32);
+            background: linear-gradient(130deg, #2f4f3d 0%, #8a5b3d 100%);
+            border: 1px solid #f4efe4;
             box-shadow: 0 8px 20px rgba(47, 79, 61, 0.12);
         }
 
@@ -215,16 +215,53 @@ def apply_theme() -> None:
 
         .hg-auth-shell p {
             margin: 0;
-            color: #3a3834 !important;
+        }
+
+        .hg-auth-shell h1,
+        .hg-auth-shell h2,
+        .hg-auth-shell h3,
+        .hg-auth-shell h4,
+        .hg-auth-shell h5,
+        .hg-auth-shell h6,
+        .hg-auth-shell p,
+        .hg-auth-shell span,
+        .hg-auth-shell a,
+        .hg-auth-shell button,
+        .hg-auth-shell input,
+        .hg-auth-shell textarea,
+        .hg-auth-shell select,
+        .hg-auth-shell option,
+        .hg-auth-shell label {
+            color: #f4efe4;
         }
 
         .hg-hero {
             background: linear-gradient(135deg, #2f4f3d 0%, #5f7d4d 50%, #8a5b3d 100%);
             color: #f9f5ea;
             border-radius: 16px;
+            border: 5px solid transparent;
+            border-image: linear-gradient(135deg, #8a5b3d 0%, #5f7d4d 50%, #2f4f3d 100%) 1;
             padding: 1.1rem 1.2rem;
             margin-bottom: 1rem;
             box-shadow: 0 8px 20px rgba(47, 79, 61, 0.22);
+        }
+
+
+        .hg-hero h1,
+        .hg-hero p,
+        .hg-hero h3,
+        .hg-hero h4,
+        .hg-hero h5,
+        .hg-hero h6,
+        .hg-hero span,
+        .hg-hero a,
+        .hg-hero button,
+        .hg-hero input,
+        .hg-hero textarea,
+        .hg-hero select,
+        .hg-hero option,
+        .hg-hero label {
+            color: #f4efe4;
         }
 
         .hg-hero p {
@@ -261,68 +298,68 @@ def apply_theme() -> None:
         }
 
         .stTabs [aria-selected="true"] {
-            background: #e5d3b8 !important;
-            border-color: #8a5b3d !important;
+            background: #e5d3b8 ;
+            border-color: #8a5b3d ;
         }
 
         /* Separate expander styling (independent from card wrappers). */
         .stExpander {
-            border: 1px solid rgba(138, 91, 61, 0.36) !important;
-            border-radius: 12px !important;
-            background: rgba(255, 250, 242, 0.88) !important;
-            box-shadow: 0 4px 12px rgba(47, 79, 61, 0.08) !important;
+            border: 1px solid rgba(138, 91, 61, 0.36) ;
+            border-radius: 12px ;
+            background: rgba(255, 250, 242, 0.88) ;
+            box-shadow: 0 4px 12px rgba(47, 79, 61, 0.08) ;
             overflow: hidden;
         }
 
         .stExpander details {
-            border: none !important;
-            border-radius: 12px !important;
-            background: transparent !important;
+            border: none ;
+            border-radius: 12px ;
+            background: transparent ;
         }
 
         .stExpander summary {
-            background: linear-gradient(180deg, #f8f1e3 0%, #f3e8d5 100%) !important;
-            border-bottom: 1px solid rgba(138, 91, 61, 0.28) !important;
-            padding: 0.55rem 0.8rem !important;
-            font-weight: 600 !important;
+            background: linear-gradient(180deg, #f8f1e3 0%, #f3e8d5 100%) ;
+            border-bottom: 1px solid rgba(138, 91, 61, 0.28) ;
+            padding: 0.55rem 0.8rem ;
+            font-weight: 600 ;
         }
 
         .stExpander details[open] > summary {
-            background: linear-gradient(180deg, #efe1c9 0%, #ead8ba 100%) !important;
+            background: linear-gradient(180deg, #efe1c9 0%, #ead8ba 100%) ;
         }
 
         .stExpander summary:hover {
-            background: linear-gradient(180deg, #f1e3cb 0%, #ecdabf 100%) !important;
+            background: linear-gradient(180deg, #f1e3cb 0%, #ecdabf 100%) ;
         }
 
         .stExpander [data-testid="stExpanderDetails"] {
-            background: #fffaf2 !important;
-            padding: 0.55rem 0.75rem 0.7rem 0.75rem !important;
+            background: #fffaf2 ;
+            padding: 0.55rem 0.75rem 0.7rem 0.75rem ;
         }
 
         /* Separate divider styling for better contrast. */
         .stApp hr,
         .stApp [data-testid="stDivider"],
         .stApp [role="separator"] {
-            border: none !important;
-            border-top: 2px solid rgba(90, 64, 44, 0.6) !important;
-            opacity: 1 !important;
-            margin-top: 0.75rem !important;
-            margin-bottom: 0.75rem !important;
+            border: none ;
+            border-top: 2px solid rgba(90, 64, 44, 0.6) ;
+            opacity: 1 ;
+            margin-top: 0.75rem ;
+            margin-bottom: 0.75rem ;
         }
 
         .stButton > button[kind="primary"],
         .stFormSubmitButton > button[kind="primary"] {
-            background: #b53a2d !important;
-            border-color: #8e261c !important;
-            color: #fff6f3 !important;
+            background: #b53a2d ;
+            border-color: #8e261c ;
+            color: #fff6f3 ;
         }
 
         .stButton > button[kind="primary"]:hover,
         .stFormSubmitButton > button[kind="primary"]:hover {
-            background: #942c22 !important;
-            border-color: #741e17 !important;
-            color: #fff6f3 !important;
+            background: #942c22 ;
+            border-color: #741e17 ;
+            color: #fff6f3 ;
         }
 
         @media (max-width: 900px) {
@@ -338,12 +375,12 @@ def apply_theme() -> None:
             }
 
             .hg-hero h1 {
-                font-size: 1.35rem !important;
-                line-height: 1.25 !important;
+                font-size: 1.35rem ;
+                line-height: 1.25 ;
             }
 
             .hg-hero p {
-                font-size: 0.92rem !important;
+                font-size: 0.92rem ;
             }
 
             div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -356,7 +393,7 @@ def apply_theme() -> None:
             [data-testid="stSidebar"] [data-baseweb="input"],
             [data-testid="stSidebar"] [data-baseweb="select"],
             [data-testid="stSidebar"] [data-baseweb="textarea"] {
-                width: 100% !important;
+                width: 100% ;
             }
 
             .hg-auth-shell {
@@ -515,14 +552,14 @@ def render_sidebar_pages(modules: list) -> str:
 
 def main() -> None:
     """App entry point."""
-    st.set_page_config(page_title="HikingGear Hub", layout="wide")
+    st.set_page_config(page_title="Vandringsplanerare V.0.2", layout="wide")
     apply_theme()
     init_session_state()
 
     st.markdown(
         """
         <div class="hg-hero">
-            <h1 style="margin:0;">HikingGear Hub</h1>
+            <h1 style="margin:0;">Vandringsplanerare V.0.2</h1>
             <p>Planera vandringar, hantera utrustning och samordna äventyr med gruppen.</p>
         </div>
         """,
@@ -577,8 +614,7 @@ def main() -> None:
         return
     st.session_state.last_module_key = selected_key
     with st.container(border=True):
-        if module.key != "welcome":
-            st.subheader(module.name)
+        if module.description:
             st.caption(module.description)
         module.render(st.session_state.current_user)
 
