@@ -9,15 +9,47 @@ from modules.registry import load_modules
 
 def get_external_ip() -> str:
     """Return host external IP for database allowlist troubleshooting."""
+    # Try multiple providers + stdlib fallback to reduce false "Unknown" results.
+    services = [
+        ("https://api64.ipify.org?format=json", "json", "ip"),
+        ("https://ipinfo.io/json", "json", "ip"),
+        ("https://checkip.amazonaws.com", "text", ""),
+        ("https://ifconfig.me/ip", "text", ""),
+    ]
     try:
         import requests
 
-        response = requests.get("https://api64.ipify.org?format=json", timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            return str(data.get("ip", "Unknown"))
+        for url, mode, field in services:
+            try:
+                response = requests.get(url, timeout=5)
+                if response.status_code != 200:
+                    continue
+                if mode == "json":
+                    data = response.json()
+                    ip_value = str(data.get(field, "")).strip()
+                else:
+                    ip_value = str(response.text).strip()
+                if ip_value:
+                    return ip_value
+            except Exception:
+                continue
+    except Exception:
+        # requests unavailable or failed; continue with stdlib fallback.
+        pass
+
+    try:
+        import json
+        from urllib.request import urlopen
+
+        with urlopen("https://api64.ipify.org?format=json", timeout=5) as response:
+            payload = response.read().decode("utf-8").strip()
+            data = json.loads(payload)
+            ip_value = str(data.get("ip", "")).strip()
+            if ip_value:
+                return ip_value
     except Exception:
         pass
+
     return "Unknown"
 
 
