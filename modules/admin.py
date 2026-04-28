@@ -56,21 +56,39 @@ def render(current_user: str) -> None:
     from .registry import load_modules
 
     all_modules = load_modules()
-    module_settings = settings.find_one({"_id": "modules"}, {"disabled_keys": 1}) or {}
+    module_settings = settings.find_one(
+        {"_id": "modules"},
+        {"disabled_keys": 1, "admin_required_keys": 1},
+    ) or {}
     disabled_keys = {str(key) for key in module_settings.get("disabled_keys", [])}
+    admin_required_keys = {str(key) for key in module_settings.get("admin_required_keys", [])}
+    admin_required_keys.add("admin")
     module_enabled_by_key: dict[str, bool] = {}
+    module_admin_required_by_key: dict[str, bool] = {}
     for module in all_modules:
-        is_admin_module = module.key == "admin"
-        module_enabled_by_key[module.key] = st.checkbox(
-            f"{module.name}",
-            value=True if is_admin_module else module.key not in disabled_keys,
-            key=f"toggle_module_{module.key}",
-            disabled=is_admin_module,
-        )
-        if is_admin_module:
+        is_admin_locked = module.key == "admin"
+        is_admin_required = bool(module.requires_admin or module.key in admin_required_keys)
+        row_col1, row_col2 = st.columns([2, 1])
+        with row_col1:
+            module_enabled_by_key[module.key] = st.checkbox(
+                f"{module.name}",
+                value=True if is_admin_locked else module.key not in disabled_keys,
+                key=f"toggle_module_{module.key}",
+                disabled=is_admin_locked,
+            )
+        with row_col2:
+            module_admin_required_by_key[module.key] = st.checkbox(
+                "Kräv admin",
+                value=True if (module.requires_admin or is_admin_locked) else is_admin_required,
+                key=f"toggle_module_admin_req_{module.key}",
+                disabled=bool(module.requires_admin or is_admin_locked),
+            )
+        if is_admin_locked:
             st.caption("Admin-modulen är alltid aktiv och kan inte stängas av.")
+        elif module.requires_admin:
+            st.caption(f"{module.name} kräver alltid adminbehörighet.")
     st.caption(
-        "Avstängda moduler visas med meddelande för användaren istället för att orsaka fel."
+        "Ställ in om modul ska vara aktiv och om den ska kräva adminbehörighet."
     )
     if st.button("Spara modulinställningar", key="admin_save_module_settings"):
         new_disabled = [
@@ -78,11 +96,19 @@ def render(current_user: str) -> None:
             for module in all_modules
             if module.key != "admin" and not bool(module_enabled_by_key.get(module.key, True))
         ]
+        new_admin_required = [
+            module.key
+            for module in all_modules
+            if module.key == "admin"
+            or module.requires_admin
+            or bool(module_admin_required_by_key.get(module.key, False))
+        ]
         settings.update_one(
             {"_id": "modules"},
             {
                 "$set": {
                     "disabled_keys": new_disabled,
+                    "admin_required_keys": sorted(set(new_admin_required)),
                     "updated_by": current_user,
                     "updated_at": utc_now(),
                 }

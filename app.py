@@ -416,6 +416,17 @@ def get_disabled_module_keys() -> set[str]:
     return disabled
 
 
+def get_admin_required_module_keys() -> set[str]:
+    """Return module keys explicitly configured to require admin rights."""
+    settings = get_collection("app_settings")
+    doc = settings.find_one({"_id": "modules"}, {"admin_required_keys": 1})
+    if not doc:
+        return set()
+    admin_required = {str(key) for key in doc.get("admin_required_keys", [])}
+    admin_required.add("admin")
+    return admin_required
+
+
 def render_user_sidebar() -> None:
     """Render account controls in sidebar once authenticated."""
     st.sidebar.title("Konto")
@@ -538,7 +549,12 @@ def main() -> None:
 
     modules = load_modules()
     current_user_is_admin = is_admin(st.session_state.current_user)
-    modules = [module for module in modules if not module.requires_admin or current_user_is_admin]
+    admin_required_module_keys = get_admin_required_module_keys()
+    modules = [
+        module
+        for module in modules
+        if not (module.requires_admin or module.key in admin_required_module_keys) or current_user_is_admin
+    ]
     disabled_module_keys = get_disabled_module_keys()
     available_modules = [module for module in modules if module.key not in disabled_module_keys]
 
