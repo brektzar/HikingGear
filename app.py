@@ -481,10 +481,25 @@ def render_auth_main(registration_enabled: bool) -> None:
 def render_sidebar_pages(modules: list) -> str:
     """Render sidebar page navigation and return selected module key."""
     st.sidebar.title("Sidor")
-    labels = [module.name for module in modules]
-    key_by_label = {module.name: module.key for module in modules}
-    selected_label = st.sidebar.button("Gå till", labels, key="page_nav")
-    return key_by_label[selected_label]
+    options = [(module.key, module.name) for module in modules]
+    selected_key = st.session_state.get("page_nav_key")
+    valid_keys = {module_key for module_key, _ in options}
+    if selected_key not in valid_keys:
+        selected_key = options[0][0]
+
+    st.sidebar.caption("Gå till")
+    for module_key, module_name in options:
+        is_selected = module_key == selected_key
+        if st.sidebar.button(
+            module_name,
+            key=f"page_btn_{module_key}",
+            type="primary" if is_selected else "secondary",
+            use_container_width=True,
+        ):
+            selected_key = module_key
+
+    st.session_state.page_nav_key = selected_key
+    return selected_key
 
 
 def main() -> None:
