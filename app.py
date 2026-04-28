@@ -577,8 +577,9 @@ def main() -> None:
         return
     st.session_state.last_module_key = selected_key
     with st.container(border=True):
-        st.subheader(module.name)
-        st.caption(module.description)
+        if module.key != "welcome":
+            st.subheader(module.name)
+            st.caption(module.description)
         module.render(st.session_state.current_user)
 
 

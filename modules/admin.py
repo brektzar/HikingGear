@@ -28,7 +28,6 @@ def render(current_user: str) -> None:
     registration_enabled = True if registration_doc is None else bool(
         registration_doc.get("registration_enabled", True)
     )
-    st.subheader("Admincenter")
     st.caption("Hantera användare och privilegierade dataåtgärder.")
 
     st.markdown("### Webbplatsinställningar")

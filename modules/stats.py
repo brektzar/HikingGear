@@ -52,7 +52,6 @@ def render(current_user: str) -> None:
         round(total_participant_slots / planned_hikes_joined, 1) if planned_hikes_joined else 0.0
     )
 
-    st.header("Statistik")
     st.caption(f"Inloggad som: {current_user}")
     row1_col1, row1_col2, row1_col3, row1_col4 = st.columns(4)
     row1_col1.metric("Mina checklistor", my_checklists)
