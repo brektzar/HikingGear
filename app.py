@@ -2,9 +2,16 @@
 
 import streamlit as st
 
-from core.auth import authenticate_user, is_admin, is_registration_enabled, register_user
+from core.auth import authenticate_user, is_admin, register_user
 from core.db import ensure_indexes, get_collection, ping_database
 from modules.registry import load_modules
+
+try:
+    from core.auth import is_registration_enabled
+except ImportError:
+    # Backward compatibility for environments with older core/auth.py.
+    def is_registration_enabled() -> bool:
+        return True
 
 
 def get_external_ip() -> str:
