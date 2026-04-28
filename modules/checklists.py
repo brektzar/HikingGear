@@ -201,12 +201,12 @@ def render(current_user: str) -> None:
                     )
                     st.rerun()
 
-            checklist_item_types = doc.get("item_types", [])
-            if checklist_item_types:
-                st.markdown("**Utrustningskategorier**")
-                for item_type in checklist_item_types:
-                    suffix = " (obligatorisk)" if item_type.get("essential") else ""
-                    st.write(f"- {item_type.get('name', 'Unnamed')}{suffix}")
+            #checklist_item_types = doc.get("item_types", [])
+            # if checklist_item_types:
+            #     st.markdown("**Utrustningskategorier**")
+            #     for item_type in checklist_item_types:
+            #         suffix = " (obligatorisk)" if item_type.get("essential") else ""
+            #         st.write(f"- {item_type.get('name', 'Unnamed')}{suffix}")
 
             linked_trails = doc.get("linked_trails", [])
             if linked_trails:
