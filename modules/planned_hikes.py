@@ -187,55 +187,56 @@ def _render_borrow_requests(
             }
 
     if requestable_by_label:
-        picked_label = st.selectbox(
-            "Förfråga om artikel",
-            list(requestable_by_label.keys()),
-            key=f"borrow_request_item_{hike['_id']}",
-        )
-        picked = requestable_by_label[picked_label]
-        request_type = st.selectbox(
-            "Förfrågningstyp",
-            ["borrowed", "shared"],
-            format_func=lambda value: {
-                "borrowed": "Låna",
-                "shared": "Dela",
-            }[value],
-            key=f"request_type_{hike['_id']}",
-        )
-        req_qty = st.number_input(
-            "Efterfragat antal",
-            min_value=1,
-            max_value=max(1, int(picked["remaining"])),
-            value=1,
-            step=1,
-            key=f"borrow_request_qty_{hike['_id']}",
-        )
-        request_button_label = (
-            "Skicka låneförfrågan" if request_type == "borrowed" else "Skicka delningsförfrågan"
-        )
-        if st.button(request_button_label, key=f"send_borrow_request_{hike['_id']}"):
-            requests.append(
-                {
-                    "request_id": f"req-{uuid4().hex[:10]}",
-                    "requester": current_user,
-                    "owner": picked["lender"],
-                    "item_id": picked["item_id"],
-                    "item_name": picked["item_name"],
-                    "quantity": int(req_qty),
-                    "request_type": request_type,
-                    "status": "pending",
-                    "created_at": utc_now(),
-                }
+        with st.expander("**Låna eller Dela Utrustning om artikel**", expanded=False):
+            picked_label = st.selectbox(
+                "Förfråga om utrustning",
+                list(requestable_by_label.keys()),
+                key=f"borrow_request_item_{hike['_id']}",
             )
-            collection.update_one(
-                {"_id": hike["_id"]},
-                {"$set": {"borrow_requests": requests, "updated_at": utc_now()}},
+            picked = requestable_by_label[picked_label]
+            request_type = st.selectbox(
+                "Förfrågningstyp",
+                ["borrowed", "shared"],
+                format_func=lambda value: {
+                    "borrowed": "Låna",
+                    "shared": "Dela",
+                }[value],
+                key=f"request_type_{hike['_id']}",
             )
-            if request_type == "shared":
-                st.success("Delningsförfrågan skickad.")
-            else:
-                st.success("Låneförfrågan skickad.")
-            st.rerun()
+            req_qty = st.number_input(
+                "Efterfragat antal",
+                min_value=1,
+                max_value=max(1, int(picked["remaining"])),
+                value=1,
+                step=1,
+                key=f"borrow_request_qty_{hike['_id']}",
+            )
+            request_button_label = (
+                "Skicka låneförfrågan" if request_type == "borrowed" else "Skicka delningsförfrågan"
+            )
+            if st.button(request_button_label, key=f"send_borrow_request_{hike['_id']}"):
+                requests.append(
+                    {
+                        "request_id": f"req-{uuid4().hex[:10]}",
+                        "requester": current_user,
+                        "owner": picked["lender"],
+                        "item_id": picked["item_id"],
+                        "item_name": picked["item_name"],
+                        "quantity": int(req_qty),
+                        "request_type": request_type,
+                        "status": "pending",
+                        "created_at": utc_now(),
+                    }
+                )
+                collection.update_one(
+                    {"_id": hike["_id"]},
+                    {"$set": {"borrow_requests": requests, "updated_at": utc_now()}},
+                )
+                if request_type == "shared":
+                    st.success("Delningsförfrågan skickad.")
+                else:
+                    st.success("Låneförfrågan skickad.")
+                st.rerun()
     else:
         st.caption("Inga tillgängliga artiklar att låna från övriga deltagare.")
 

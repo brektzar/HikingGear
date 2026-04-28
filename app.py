@@ -122,11 +122,23 @@ def apply_theme() -> None:
             background: #efe6d6 !important;
         }
 
-        [data-testid="stHeader"] *,
-        [data-testid="stToolbar"] *,
-        [data-testid="stDecoration"] * {
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"] {
             color: #161512 !important;
+        }
+
+        [data-testid="stHeader"] button,
+        [data-testid="stToolbar"] button {
+            color: #161512 !important;
+        }
+
+        [data-testid="stHeader"] button svg,
+        [data-testid="stToolbar"] button svg,
+        [data-testid="stHeader"] button svg path,
+        [data-testid="stToolbar"] button svg path {
             fill: #161512 !important;
+            stroke: #161512 !important;
         }
 
         [data-testid="stToolbar"] button {
