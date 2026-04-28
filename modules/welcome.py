@@ -40,7 +40,7 @@ def get_module() -> AppModule:
     """Return module metadata and render callable."""
     return AppModule(
         key="welcome",
-        name="Välkommen",
-        description="Enkel startsida för appen.",
+        name="",
+        description="",
         render=render,
     )

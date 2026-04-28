@@ -483,7 +483,7 @@ def render_sidebar_pages(modules: list) -> str:
     st.sidebar.title("Sidor")
     labels = [module.name for module in modules]
     key_by_label = {module.name: module.key for module in modules}
-    selected_label = st.sidebar.radio("Gå till", labels, key="page_nav")
+    selected_label = st.sidebar.button("Gå till", labels, key="page_nav")
     return key_by_label[selected_label]
 
 
