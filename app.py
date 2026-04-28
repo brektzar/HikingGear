@@ -7,6 +7,20 @@ from core.db import ensure_indexes, ping_database
 from modules.registry import load_modules
 
 
+def get_external_ip() -> str:
+    """Return host external IP for database allowlist troubleshooting."""
+    try:
+        import requests
+
+        response = requests.get("https://api64.ipify.org?format=json", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return str(data.get("ip", "Unknown"))
+    except Exception:
+        pass
+    return "Unknown"
+
+
 def apply_theme() -> None:
     """Apply a hiking-inspired earth-tone visual theme."""
     st.markdown(
@@ -414,6 +428,8 @@ def main() -> None:
         connected, message = ping_database()
         if not connected:
             st.error(message)
+            host_ip = get_external_ip()
+            st.warning(f"Extern IP (för grönlistning i databasen): {host_ip}")
             st.info("Skapa `.streamlit/secrets.toml` med Mongo-inställningar och kör igen.")
             return
         ensure_indexes()
