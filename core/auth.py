@@ -72,3 +72,12 @@ def is_admin(username: str) -> bool:
     if bool(doc.get("is_admin", False)):
         return True
     return str(doc.get("role", "")).strip().lower() == "admin"
+
+
+def is_registration_enabled() -> bool:
+    """Return whether self-registration is enabled for the site."""
+    settings = get_collection("app_settings")
+    doc = settings.find_one({"_id": "auth"}, {"registration_enabled": 1})
+    if doc is None:
+        return True
+    return bool(doc.get("registration_enabled", True))

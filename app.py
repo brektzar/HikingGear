@@ -2,8 +2,8 @@
 
 import streamlit as st
 
-from core.auth import authenticate_user, is_admin, register_user
-from core.db import ensure_indexes, ping_database
+from core.auth import authenticate_user, is_admin, is_registration_enabled, register_user
+from core.db import ensure_indexes, get_collection, ping_database
 from modules.registry import load_modules
 
 
@@ -395,6 +395,18 @@ def init_session_state() -> None:
     """Initialize state keys used across reruns."""
     st.session_state.setdefault("current_user", None)
     st.session_state.setdefault("db_ready", False)
+    st.session_state.setdefault("last_module_key", None)
+
+
+def get_disabled_module_keys() -> set[str]:
+    """Return module keys disabled by admin settings."""
+    settings = get_collection("app_settings")
+    doc = settings.find_one({"_id": "modules"}, {"disabled_keys": 1})
+    if not doc:
+        return set()
+    disabled = {str(key) for key in doc.get("disabled_keys", [])}
+    disabled.discard("admin")
+    return disabled
 
 
 def render_user_sidebar() -> None:
@@ -408,7 +420,7 @@ def render_user_sidebar() -> None:
         st.rerun()
 
 
-def render_auth_main() -> None:
+def render_auth_main(registration_enabled: bool) -> None:
     """Render a mobile-friendly authentication card in the main content area."""
     st.markdown(
         """
@@ -420,7 +432,11 @@ def render_auth_main() -> None:
         unsafe_allow_html=True,
     )
 
-    login_tab, register_tab = st.tabs(["Logga in", "Registrera"])
+    if registration_enabled:
+        login_tab, register_tab = st.tabs(["Logga in", "Registrera"])
+    else:
+        login_tab = st.container()
+        register_tab = None
 
     with login_tab:
         with st.form("login_form", clear_on_submit=False):
@@ -435,21 +451,24 @@ def render_auth_main() -> None:
                     st.rerun()
                 st.error(result.message)
 
-    with register_tab:
-        with st.form("register_form", clear_on_submit=False):
-            username = st.text_input("Användarnamn", key="main_username_register")
-            password = st.text_input("Lösenord", type="password", key="main_password_register")
-            confirm = st.text_input("Bekräfta lösenord", type="password", key="main_confirm_register")
-            submitted = st.form_submit_button("Skapa konto")
-            if submitted:
-                if password != confirm:
-                    st.error("Lösenorden matchar inte.")
-                else:
-                    result = register_user(username, password)
-                    if result.ok:
-                        st.success(result.message)
+    if register_tab is not None:
+        with register_tab:
+            with st.form("register_form", clear_on_submit=False):
+                username = st.text_input("Användarnamn", key="main_username_register")
+                password = st.text_input("Lösenord", type="password", key="main_password_register")
+                confirm = st.text_input("Bekräfta lösenord", type="password", key="main_confirm_register")
+                submitted = st.form_submit_button("Skapa konto")
+                if submitted:
+                    if password != confirm:
+                        st.error("Lösenorden matchar inte.")
                     else:
-                        st.error(result.message)
+                        result = register_user(username, password)
+                        if result.ok:
+                            st.success(result.message)
+                        else:
+                            st.error(result.message)
+    else:
+        st.info("Registrering är för närvarande avstängd av administratör.")
 
 
 def render_sidebar_pages(modules: list) -> str:
@@ -492,15 +511,33 @@ def main() -> None:
         render_user_sidebar()
 
     if not st.session_state.current_user:
-        render_auth_main()
+        render_auth_main(is_registration_enabled())
         return
 
     modules = load_modules()
     current_user_is_admin = is_admin(st.session_state.current_user)
     modules = [module for module in modules if not module.requires_admin or current_user_is_admin]
-    key_to_module = {module.key: module for module in modules}
-    selected_key = render_sidebar_pages(modules)
-    module = key_to_module[selected_key]
+    disabled_module_keys = get_disabled_module_keys()
+    available_modules = [module for module in modules if module.key not in disabled_module_keys]
+
+    last_module_key = st.session_state.get("last_module_key")
+    all_accessible_keys = {module.key for module in modules}
+    module_name_by_key = {module.key: module.name for module in modules}
+    if last_module_key in all_accessible_keys and last_module_key in disabled_module_keys:
+        module_name = module_name_by_key.get(last_module_key, "Den valda modulen")
+        st.warning(f"Modulen '{module_name}' är avstängd av administratören.")
+
+    if not available_modules:
+        st.warning("Alla moduler är avstängda av administratören.")
+        return
+
+    key_to_module = {module.key: module for module in available_modules}
+    selected_key = render_sidebar_pages(available_modules)
+    module = key_to_module.get(selected_key)
+    if module is None:
+        st.error("Den här modulen är avstängd av administratören.")
+        return
+    st.session_state.last_module_key = selected_key
     with st.container(border=True):
         st.subheader(module.name)
         st.caption(module.description)
