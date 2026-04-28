@@ -66,24 +66,46 @@ def apply_theme() -> None:
         """
         <style>
         :root {
-            --hg-bg: #f4efe4;
-            --hg-paper: #fbf8f1;
-            --hg-forest: #2f4f3d;
-            --hg-moss: #5f7d4d;
-            --hg-sand: #cfb997;
-            --hg-clay: #8a5b3d;
-            --hg-text: #2b2a28;
+            --hg-sandstrand: #E8DCC3;
+            --hg-ljus-beige: #D9C6A3;
+            --hg-solblekt-halm: #E2C77A;
+            --hg-olivgron: #7A8A5A;
+            --hg-mossig-skog: #5E6E4A;
+            --hg-djup-skog: #3E4D34;
+            --hg-jordig-brun: #8B6E4F;
+            --hg-trabark: #6B3F2A;
+            --hg-mork-jord: #3A2A1F;
+            --hg-gyllene-gul: #D4A72C;
+            --hg-senapsgul: #C9B24D;
+            --hg-rostad-lera: #C8693D;
+            --hg-tegelrod: #A44432;
+            --hg-naturrod: #7F2E2E;
+            --hg-dov-ros: #B47A6F;
+            --hg-varm-beige: #CBB9A0;
+            --hg-sten: #8E8D83;
+            --hg-skiffergra: #5A5A5A;
+
+            --hg-bg: var(--hg-sandstrand);
+            --hg-paper: var(--hg-ljus-beige);
+            --hg-forest: var(--hg-djup-skog);
+            --hg-moss: var(--hg-mossig-skog);
+            --hg-sand: var(--hg-solblekt-halm);
+            --hg-clay: var(--hg-rostad-lera);
+            --hg-text: var(--hg-mork-jord);
+
+            --hg-overlay-forest: rgba(62, 77, 52, 0.10);
+            --hg-overlay-moss: rgba(94, 110, 74, 0.18);
+            --hg-overlay-bark: rgba(107, 63, 42, 0.32);
+            --hg-overlay-earth: rgba(58, 42, 31, 0.16);
+            --hg-overlay-paper: rgba(232, 220, 195, 0.88);
         }
 
         .stApp {
-            background: linear-gradient(180deg, #f1ebde 0%, #f7f2e8 100%);
+            background: linear-gradient(180deg, var(--hg-sandstrand) 0%, var(--hg-ljus-beige) 100%);
             color: var(--hg-text);
         }
 
-        .stApp,
-        .stApp * {
-            color: #161512;
-        }
+
 
         .stApp p,
         .stApp li,
@@ -98,7 +120,7 @@ def apply_theme() -> None:
         .stApp h4,
         .stApp h5,
         .stApp h6 {
-            color: #161512;
+            color: var(--hg-djup-skog);
         }
 
         .stApp [data-baseweb="select"] *,
@@ -106,96 +128,122 @@ def apply_theme() -> None:
         .stApp [data-baseweb="textarea"] *,
         .stApp [data-baseweb="radio"] *,
         .stApp [data-baseweb="checkbox"] * {
-            color: #161512;
+            color: var(--hg-djup-skog);
         }
 
         .stApp [data-baseweb="select"] > div,
         .stApp [data-baseweb="input"] > div,
         .stApp [data-baseweb="textarea"] > div {
-            background-color: #fffaf2;
-            border: 1px solid rgba(138, 91, 61, 0.28);
+            background-color: var(--hg-sandstrand);
+            border: 1px solid var(--hg-varm-beige);
             border-radius: 10px;
-            box-shadow: 0 1px 2px rgba(47, 79, 61, 0.08);
+            box-shadow: 0 1px 2px var(--hg-overlay-forest);
         }
 
         .stApp [data-baseweb="input"] > div:focus-within,
         .stApp [data-baseweb="textarea"] > div:focus-within,
         .stApp [data-baseweb="select"] > div:focus-within {
-            border-color: #5f7d4d;
-            box-shadow: 0 0 0 2px rgba(95, 125, 77, 0.18);
+            border-color: var(--hg-mossig-skog);
+            box-shadow: 0 0 0 2px var(--hg-overlay-moss);
+        }
+
+        .stApp [data-baseweb="input"] input::placeholder,
+        .stApp [data-baseweb="textarea"] textarea::placeholder {
+            color: var(--hg-jordig-brun);
+            opacity: 1;
         }
 
         [data-testid="stHeader"] {
-            background: #efe6d6;
+            background: var(--hg-ljus-beige);
         }
 
         [data-testid="stHeader"],
         [data-testid="stToolbar"],
         [data-testid="stDecoration"] {
-            color: #161512;
+            color: var(--hg-text);
         }
 
         [data-testid="stHeader"] button,
         [data-testid="stToolbar"] button {
-            color: #161512 ;
-            background: #fffaf2 ;
-            border: 1px solid #cfb997 ;
+            color: var(--hg-text) ;
+            background: var(--hg-sandstrand) ;
+            border: 1px solid var(--hg-varm-beige) ;
         }
 
-        [data-testid="stHeader"] button svg,
+        /*[data-testid="stHeader"] button svg,
         [data-testid="stToolbar"] button svg,
         [data-testid="stHeader"] button svg path,
         [data-testid="stToolbar"] button svg path {
-            fill: #161512 ;
-            stroke: #161512 ;
+            fill: var(--hg-text) ;
+            stroke: var(--hg-text) ;
         }
 
         [data-testid="stHeader"] button *,
         [data-testid="stToolbar"] button * {
-            color: #161512 ;
-            fill: #161512 ;
-            stroke: #161512 ;
+            color: var(--hg-text) ;
+            fill: var(--hg-text) ;
+            stroke: var(--hg-text) ;
         }
 
         [data-testid="stToolbar"] button {
-            background: #fffaf2 ;
-            border: 1px solid #cfb997 ;
-            color: #161512 ;
-        }
+            background: var(--hg-sandstrand) ;
+            border: 1px solid var(--hg-varm-beige) ;
+            color: var(--hg-text) ;
+        }*/
 
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #304b3d 0%, #3d5f4e 100%);
+            background: linear-gradient(180deg, var(--hg-djup-skog) 0%, var(--hg-mossig-skog) 100%);
         }
 
         [data-testid="stSidebar"] * {
-            color: #f4efe4 ;
+            color: var(--hg-sandstrand) ;
+        }
+
+        [data-testid="stSidebar"] .stButton > button,
+        [data-testid="stSidebar"] .stFormSubmitButton > button {
+            color: var(--hg-sandstrand);
         }
 
         [data-testid="stSidebar"] [data-baseweb="select"] *,
         [data-testid="stSidebar"] [data-baseweb="input"] *,
         [data-testid="stSidebar"] [data-baseweb="textarea"] * {
-            color: #f4efe4 ;
+            color: var(--hg-sandstrand) ;
         }
 
         [data-testid="stSidebar"] [data-baseweb="input"] input,
         [data-testid="stSidebar"] [data-baseweb="input"] textarea,
         [data-testid="stSidebar"] [data-baseweb="textarea"] textarea {
-            color: #161512 ;
-            -webkit-text-fill-color: #161512 ;
-            caret-color: #161512 ;
+            color: var(--hg-text) ;
+            -webkit-text-fill-color: var(--hg-text) ;
+            caret-color: var(--hg-djup-skog) ;
         }
 
         [data-testid="stSidebar"] [data-baseweb="input"] input::placeholder,
         [data-testid="stSidebar"] [data-baseweb="textarea"] textarea::placeholder {
-            color: #5a574f ;
+            color: var(--hg-sten) ;
             opacity: 1;
+        }
+
+        .hg-sidebar-heading {
+            text-align: center;
+            font-size: 2.0rem;
+            font-weight: 800;
+            line-height: 1.25;
+            color: var(--hg-mork-jord);
+            margin: 0.25rem 0 0.7rem 0;
+        }
+
+        .hg-sidebar-note {
+            color: var(--hg-sandstrand);
+            font-weight: 700;
+            margin: 0.15rem 0 0.35rem 0;
         }
 
         div[data-testid="stVerticalBlockBorderWrapper"] {
             border-radius: 14px;
-            border: 1px solid rgba(138, 91, 61, 0.35);
-            background: rgba(251, 248, 241, 0.92);
-            box-shadow: 0 6px 18px rgba(47, 79, 61, 0.09);
+            border: 1px solid var(--hg-overlay-bark);
+            background: var(--hg-overlay-paper);
+            box-shadow: 0 6px 18px var(--hg-overlay-forest);
             padding: 0.35rem 0.5rem;
         }
 
@@ -204,9 +252,9 @@ def apply_theme() -> None:
             margin: 0.5rem auto 0.9rem auto;
             padding: 0.4rem;
             border-radius: 16px;
-            background: linear-gradient(130deg, #2f4f3d 0%, #8a5b3d 100%);
-            border: 1px solid #f4efe4;
-            box-shadow: 0 8px 20px rgba(47, 79, 61, 0.12);
+            background: linear-gradient(130deg, var(--hg-djup-skog) 0%, var(--hg-jordig-brun) 100%);
+            border: 1px solid var(--hg-sandstrand);
+            box-shadow: 0 8px 20px var(--hg-overlay-forest);
         }
 
         .hg-auth-shell h3 {
@@ -227,23 +275,26 @@ def apply_theme() -> None:
         .hg-auth-shell span,
         .hg-auth-shell a,
         .hg-auth-shell button,
-        .hg-auth-shell input,
         .hg-auth-shell textarea,
         .hg-auth-shell select,
         .hg-auth-shell option,
         .hg-auth-shell label {
-            color: #f4efe4;
+            color: var(--hg-sandstrand);
+        }
+
+        .hg-auth-shell input {
+            color: var(--hg-djup-skog);
         }
 
         .hg-hero {
-            background: linear-gradient(135deg, #2f4f3d 0%, #5f7d4d 50%, #8a5b3d 100%);
-            color: #f9f5ea;
+            background: linear-gradient(135deg, var(--hg-djup-skog) 0%, var(--hg-rostad-lera) 80%, var(--hg-gyllene-gul) 100%);
+            color: var(--hg-sandstrand);
             border-radius: 16px;
             border: 5px solid transparent;
-            border-image: linear-gradient(135deg, #8a5b3d 0%, #5f7d4d 50%, #2f4f3d 100%) 1;
+            border-image: linear-gradient(135deg, var(--hg-jordig-brun) 0%, var(--hg-mossig-skog) 50%, var(--hg-djup-skog) 100%) 1;
             padding: 1.1rem 1.2rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 20px rgba(47, 79, 61, 0.22);
+            box-shadow: 0 8px 20px rgba(62, 77, 52, 0.22);
         }
 
 
@@ -261,7 +312,7 @@ def apply_theme() -> None:
         .hg-hero select,
         .hg-hero option,
         .hg-hero label {
-            color: #f4efe4;
+            color: var(--hg-sandstrand);
         }
 
         .hg-hero p {
@@ -272,18 +323,18 @@ def apply_theme() -> None:
         .stButton > button,
         .stFormSubmitButton > button {
             border-radius: 10px;
-            border: 1px solid #5f7d4d;
-            background: #5f7d4d;
-            color: #f8f3e8;
+            border: 1px solid var(--hg-olivgron);
+            background: var(--hg-mossig-skog);
+            color: var(--hg-solblekt-halm);
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(47, 79, 61, 0.18);
+            box-shadow: 0 2px 8px var(--hg-overlay-moss);
         }
 
         .stButton > button:hover,
         .stFormSubmitButton > button:hover {
-            border-color: #2f4f3d;
-            background: #2f4f3d;
-            color: #fffaf0;
+            border-color: var(--hg-olivgron);
+            background: var(--hg-djup-skog);
+            color: var(--hg-solblekt-halm);
         }
 
         .stTabs [data-baseweb="tab-list"] {
@@ -291,23 +342,23 @@ def apply_theme() -> None:
         }
 
         .stTabs [data-baseweb="tab"] {
-            background: #f6efe1;
-            border: 1px solid rgba(138, 91, 61, 0.32);
+            background: var(--hg-ljus-beige);
+            border: 1px solid var(--hg-overlay-bark);
             border-radius: 10px;
             padding: 0.35rem 0.85rem;
         }
 
         .stTabs [aria-selected="true"] {
-            background: #e5d3b8 ;
-            border-color: #8a5b3d ;
+            background: var(--hg-solblekt-halm) ;
+            border-color: var(--hg-jordig-brun) ;
         }
 
         /* Separate expander styling (independent from card wrappers). */
         .stExpander {
-            border: 1px solid rgba(138, 91, 61, 0.36) ;
+            border: 1px solid var(--hg-overlay-bark) ;
             border-radius: 12px ;
-            background: rgba(255, 250, 242, 0.88) ;
-            box-shadow: 0 4px 12px rgba(47, 79, 61, 0.08) ;
+            background: var(--hg-overlay-paper) ;
+            box-shadow: 0 4px 12px var(--hg-overlay-forest) ;
             overflow: hidden;
         }
 
@@ -318,23 +369,71 @@ def apply_theme() -> None:
         }
 
         .stExpander summary {
-            background: linear-gradient(180deg, #f8f1e3 0%, #f3e8d5 100%) ;
-            border-bottom: 1px solid rgba(138, 91, 61, 0.28) ;
+            background: linear-gradient(90deg, var(--hg-olivgron) 0%, var(--hg-rostad-lera) 30%, var(--hg-senapsgul) 70%) ;
+            border-bottom: 2px solid var(--hg-overlay-bark) ;
             padding: 0.55rem 0.8rem ;
             font-weight: 600 ;
         }
 
         .stExpander details[open] > summary {
-            background: linear-gradient(180deg, #efe1c9 0%, #ead8ba 100%) ;
+            background: linear-gradient(90deg, var(--hg-olivgron) 0%, var(--hg-rostad-lera) 70%, var(--hg-senapsgul) 100%) ;
         }
 
         .stExpander summary:hover {
-            background: linear-gradient(180deg, #f1e3cb 0%, #ecdabf 100%) ;
+            background: linear-gradient(90deg, var(--hg-olivgron) 0%, var(--hg-rostad-lera) 50%, var(--hg-senapsgul) 100%) ;
         }
 
         .stExpander [data-testid="stExpanderDetails"] {
-            background: #fffaf2 ;
+            background: var(--hg-ljus-beige) ;
             padding: 0.55rem 0.75rem 0.7rem 0.75rem ;
+        }
+
+        /* Reusable gear/checklist cards */
+        .gear-card {
+            border: 1px solid var(--hg-overlay-bark) !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 0.7rem !important;
+            margin-bottom: 0.65rem !important;
+            box-shadow: 0 2px 8px var(--hg-overlay-forest) !important;
+            background: var(--hg-overlay-paper) !important;
+        }
+
+        .gear-card--missing {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-naturrod) !important;
+        }
+
+        .gear-card--started {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-gyllene-gul) !important;
+        }
+
+        .gear-card--complete {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-olivgron) !important;
+        }
+
+        div[class*="st-key-gear_card_"] {
+            border: 2px solid var(--hg-overlay-bark) !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 0.7rem !important;
+            margin-bottom: 0.65rem !important;
+            box-shadow: 0 2px 8px var(--hg-overlay-forest) !important;
+        }
+
+        div[class*="st-key-gear_card_missing_"] {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-naturrod) !important;
+        }
+
+        div[class*="st-key-gear_card_started_"] {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-gyllene-gul) !important;
+        }
+
+        div[class*="st-key-gear_card_complete_"] {
+            background: var(--hg-sandstrand) !important;
+            border-color: var(--hg-olivgron) !important;
         }
 
         /* Separate divider styling for better contrast. */
@@ -342,7 +441,7 @@ def apply_theme() -> None:
         .stApp [data-testid="stDivider"],
         .stApp [role="separator"] {
             border: none ;
-            border-top: 2px solid rgba(90, 64, 44, 0.6) ;
+            border-top: 2px solid rgba(58, 42, 31, 0.6) ;
             opacity: 1 ;
             margin-top: 0.75rem ;
             margin-bottom: 0.75rem ;
@@ -350,16 +449,38 @@ def apply_theme() -> None:
 
         .stButton > button[kind="primary"],
         .stFormSubmitButton > button[kind="primary"] {
-            background: #b53a2d ;
-            border-color: #8e261c ;
-            color: #fff6f3 ;
+            background: var(--hg-tegelrod) ;
+            border-color: var(--hg-naturrod) ;
+            color: var(--hg-sandstrand) ;
         }
 
         .stButton > button[kind="primary"]:hover,
         .stFormSubmitButton > button[kind="primary"]:hover {
-            background: #942c22 ;
-            border-color: #741e17 ;
-            color: #fff6f3 ;
+            background: var(--hg-naturrod) ;
+            border-color: var(--hg-mork-jord) ;
+            color: var(--hg-sandstrand) ;
+        }
+
+        /* Force sidebar button text color */
+        [data-testid="stSidebar"] .stButton > button,
+        [data-testid="stSidebar"] .stFormSubmitButton > button,
+        [data-testid="stSidebar"] .stButton > button *,
+        [data-testid="stSidebar"] .stFormSubmitButton > button * {
+            color: var(--hg-sandstrand) !important;
+            fill: var(--hg-sandstrand) !important;
+            stroke: var(--hg-sandstrand) !important;
+            -webkit-text-fill-color: var(--hg-sandstrand) !important;
+        }
+
+        /* Force main-area green button text color (exclude sidebar) */
+        [data-testid="stMain"] .stButton > button,
+        [data-testid="stMain"] .stFormSubmitButton > button,
+        [data-testid="stMain"] .stButton > button *,
+        [data-testid="stMain"] .stFormSubmitButton > button * {
+            color: var(--hg-solblekt-halm) !important;
+            fill: var(--hg-solblekt-halm) !important;
+            stroke: var(--hg-solblekt-halm) !important;
+            -webkit-text-fill-color: var(--hg-solblekt-halm) !important;
         }
 
         @media (max-width: 900px) {
@@ -464,12 +585,31 @@ def get_admin_required_module_keys() -> set[str]:
     return admin_required
 
 
+def get_module_order_keys() -> list[str]:
+    """Return module order configured by admin settings."""
+    settings = get_collection("app_settings")
+    doc = settings.find_one({"_id": "modules"}, {"module_order_keys": 1})
+    if not doc:
+        return []
+    return [str(key) for key in doc.get("module_order_keys", []) if str(key).strip()]
+
+
+def apply_module_order(modules: list, ordered_keys: list[str]) -> list:
+    """Return modules sorted by configured order, with unknown keys last."""
+    if not ordered_keys:
+        return modules
+    module_by_key = {module.key: module for module in modules}
+    ordered_modules = [module_by_key[key] for key in ordered_keys if key in module_by_key]
+    remaining = [module for module in modules if module.key not in set(ordered_keys)]
+    return ordered_modules + remaining
+
+
 def render_user_sidebar() -> None:
     """Render account controls in sidebar once authenticated."""
-    st.sidebar.title("Konto")
+    st.sidebar.markdown('<div class="hg-sidebar-heading">Konto</div>', unsafe_allow_html=True)
     st.sidebar.success(f"Inloggad: {st.session_state.current_user}")
     if is_admin(st.session_state.current_user):
-        st.sidebar.caption("Roll: Admin")
+        st.sidebar.markdown('<div class="hg-sidebar-note">Roll: Admin</div>', unsafe_allow_html=True)
     if st.sidebar.button("Logga ut"):
         st.session_state.current_user = None
         st.rerun()
@@ -528,14 +668,14 @@ def render_auth_main(registration_enabled: bool) -> None:
 
 def render_sidebar_pages(modules: list) -> str:
     """Render sidebar page navigation and return selected module key."""
-    st.sidebar.title("Sidor")
+    st.sidebar.markdown('<div class="hg-sidebar-heading">Sidor</div>', unsafe_allow_html=True)
     options = [(module.key, module.name) for module in modules]
     selected_key = st.session_state.get("page_nav_key")
     valid_keys = {module_key for module_key, _ in options}
     if selected_key not in valid_keys:
         selected_key = options[0][0]
 
-    st.sidebar.caption("Gå till")
+    st.sidebar.markdown('<div class="hg-sidebar-note">Gå till</div>', unsafe_allow_html=True)
     for module_key, module_name in options:
         is_selected = module_key == selected_key
         if st.sidebar.button(
@@ -585,6 +725,7 @@ def main() -> None:
         return
 
     modules = load_modules()
+    modules = apply_module_order(modules, get_module_order_keys())
     current_user_is_admin = is_admin(st.session_state.current_user)
     admin_required_module_keys = get_admin_required_module_keys()
     modules = [

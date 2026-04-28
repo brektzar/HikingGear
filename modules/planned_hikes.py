@@ -581,62 +581,77 @@ def _render_hike_checklist(hike: dict, current_user: str, collection) -> None:
             matching_assignments = entry["matching_assignments"]
             required_users = entry["required_users"]
             status = entry["status"]
+            status_class = {
+                "saknas": "gear-card--missing",
+                "påbörjad": "gear-card--started",
+                "klar": "gear-card--complete",
+            }.get(status, "gear-card--missing")
+            status_key = {
+                "saknas": "missing",
+                "påbörjad": "started",
+                "klar": "complete",
+            }.get(status, "missing")
             card_col = card_columns[req_index % 3]
+            
             with card_col:
-                st.markdown(f'**{requirement.get("text", "Artikel")}**')
-                if matching_assignments:
-                    for assignment in matching_assignments:
-                        st.caption(_assignment_line(assignment))
-                else:
-                    st.caption("Ingen tilldelning än (alla deltagare förväntas packa denna artikel).")
-                user_cols = st.columns(max(1, len(required_users)))
-                for idx, participant in enumerate(required_users):
-                    checkbox_key = f"packed_{hike['_id']}_{participant}_{requirement['requirement_id']}"
-                    checked = user_cols[idx].checkbox(
-                        f"{participant} packed",
-                        value=checks_by_key.get((participant, requirement["requirement_id"]), False),
-                        key=checkbox_key,
-                        disabled=participant != current_user,
-                    )
-                    if checks_by_key.get((participant, requirement["requirement_id"]), False):
-                        packed_required_slots += 1
-                    if participant == current_user and checked != checks_by_key.get(
-                        (participant, requirement["requirement_id"]),
-                        False,
-                    ):
-                        updated_checks = [
-                            entry
-                            for entry in checks
-                            if not (
-                                entry.get("participant") == participant
-                                and entry.get("requirement_id") == requirement["requirement_id"]
+                with st.container(
+                    key=f"gear_card_{status_key}_{hike['_id']}_{req_index}",
+                ):
+                    st.markdown(f'**{requirement.get("text", "Artikel")}**')
+                    if matching_assignments:
+                        for assignment in matching_assignments:
+                            st.caption(_assignment_line(assignment))
+                    else:
+                        st.caption("Ingen tilldelning än.")
+                    user_cols = st.columns(max(1, len(required_users)))
+                    for idx, participant in enumerate(required_users):
+                        checkbox_key = f"packed_{hike['_id']}_{participant}_{requirement['requirement_id']}"
+                        checked = user_cols[idx].checkbox(
+                            f"{participant} packed",
+                            value=checks_by_key.get((participant, requirement["requirement_id"]), False),
+                            key=checkbox_key,
+                            disabled=participant != current_user,
+                        )
+                        if checks_by_key.get((participant, requirement["requirement_id"]), False):
+                            packed_required_slots += 1
+                        if participant == current_user and checked != checks_by_key.get(
+                            (participant, requirement["requirement_id"]),
+                            False,
+                        ):
+                            updated_checks = [
+                                entry
+                                for entry in checks
+                                if not (
+                                    entry.get("participant") == participant
+                                    and entry.get("requirement_id") == requirement["requirement_id"]
+                                )
+                            ]
+                            updated_checks.append(
+                                {
+                                    "participant": participant,
+                                    "requirement_id": requirement["requirement_id"],
+                                    "done": checked,
+                                    "updated_at": utc_now(),
+                                }
                             )
-                        ]
-                        updated_checks.append(
-                            {
-                                "participant": participant,
-                                "requirement_id": requirement["requirement_id"],
-                                "done": checked,
-                                "updated_at": utc_now(),
-                            }
-                        )
-                        collection.update_one(
-                            {"_id": hike["_id"]},
-                            {"$set": {"participant_checks": updated_checks, "updated_at": utc_now()}},
-                        )
-                        st.rerun()
+                            collection.update_one(
+                                {"_id": hike["_id"]},
+                                {"$set": {"participant_checks": updated_checks, "updated_at": utc_now()}},
+                            )
+                            st.rerun()
 
-                missing_users = [
-                    participant
-                    for participant in required_users
-                    if not checks_by_key.get((participant, requirement["requirement_id"]), False)
-                ]
-                if status == "klar":
-                    st.success("Klar")
-                elif status == "påbörjad":
-                    st.warning("Påbörjad")
-                else:
-                    st.error("Saknas: " + ", ".join(missing_users))
+                    missing_users = [
+                        participant
+                        for participant in required_users
+                        if not checks_by_key.get((participant, requirement["requirement_id"]), False)
+                    ]
+                    if status == "klar":
+                        st.success("Klar")
+                    elif status == "påbörjad":
+                        st.warning("Påbörjad")
+                    else:
+                        st.error("Saknas: " + ", ".join(missing_users))
+
     st.markdown("### Packningsöversikt för vandringen")
     checks = list(hike.get("participant_checks", []))
     checks_by_key = {

@@ -51,220 +51,266 @@ def render(current_user: str) -> None:
         st.success("Webbplatsinställningar uppdaterade.")
         st.rerun()
 
-    st.markdown("### Modulhantering")
     from .registry import load_modules
 
     all_modules = load_modules()
     module_settings = settings.find_one(
         {"_id": "modules"},
-        {"disabled_keys": 1, "admin_required_keys": 1},
+        {"disabled_keys": 1, "admin_required_keys": 1, "module_order_keys": 1},
     ) or {}
     disabled_keys = {str(key) for key in module_settings.get("disabled_keys", [])}
     admin_required_keys = {str(key) for key in module_settings.get("admin_required_keys", [])}
     admin_required_keys.add("admin")
+    default_order = [module.key for module in all_modules]
+    valid_keys = set(default_order)
+    saved_order = [key for key in module_settings.get("module_order_keys", []) if key in valid_keys]
+    for key in default_order:
+        if key not in saved_order:
+            saved_order.append(key)
+    order_state_key = "admin_module_order_keys"
+    current_state = st.session_state.get(order_state_key)
+    if not isinstance(current_state, list) or set(current_state) != valid_keys:
+        st.session_state[order_state_key] = list(saved_order)
+    ordered_module_keys = list(st.session_state[order_state_key])
+    modules_by_key = {module.key: module for module in all_modules}
     module_enabled_by_key: dict[str, bool] = {}
     module_admin_required_by_key: dict[str, bool] = {}
-    for module in all_modules:
-        is_admin_locked = module.key == "admin"
-        is_admin_required = bool(module.requires_admin or module.key in admin_required_keys)
-        row_col1, row_col2 = st.columns([2, 1])
-        with row_col1:
-            module_enabled_by_key[module.key] = st.checkbox(
-                f"{module.name}",
-                value=True if is_admin_locked else module.key not in disabled_keys,
-                key=f"toggle_module_{module.key}",
-                disabled=is_admin_locked,
-            )
-        with row_col2:
-            module_admin_required_by_key[module.key] = st.checkbox(
-                "Kräv admin",
-                value=True if (module.requires_admin or is_admin_locked) else is_admin_required,
-                key=f"toggle_module_admin_req_{module.key}",
-                disabled=bool(module.requires_admin or is_admin_locked),
-            )
-        if is_admin_locked:
-            st.caption("Admin-modulen är alltid aktiv och kan inte stängas av.")
-        elif module.requires_admin:
-            st.caption(f"{module.name} kräver alltid adminbehörighet.")
-    st.caption(
-        "Ställ in om modul ska vara aktiv och om den ska kräva adminbehörighet."
-    )
-    if st.button("Spara modulinställningar", key="admin_save_module_settings"):
-        new_disabled = [
-            module.key
-            for module in all_modules
-            if module.key != "admin" and not bool(module_enabled_by_key.get(module.key, True))
-        ]
-        new_admin_required = [
-            module.key
-            for module in all_modules
-            if module.key == "admin"
-            or module.requires_admin
-            or bool(module_admin_required_by_key.get(module.key, False))
-        ]
-        settings.update_one(
-            {"_id": "modules"},
-            {
-                "$set": {
-                    "disabled_keys": new_disabled,
-                    "admin_required_keys": sorted(set(new_admin_required)),
+
+    admin_col1, admin_col2, admin_col3 = st.columns(3)
+
+    with admin_col1:
+        with st.expander("**Modulhantering**"):
+            for module_key in ordered_module_keys:
+                module = modules_by_key[module_key]
+                is_admin_locked = module.key == "admin"
+                is_admin_required = bool(module.requires_admin or module.key in admin_required_keys)
+                row_col1, row_col2 = st.columns([2, 1])
+                with row_col1:
+                    module_enabled_by_key[module.key] = st.checkbox(
+                        f"{module.name}",
+                        value=True if is_admin_locked else module.key not in disabled_keys,
+                        key=f"toggle_module_{module.key}",
+                        disabled=is_admin_locked,
+                    )
+                with row_col2:
+                    module_admin_required_by_key[module.key] = st.checkbox(
+                        "Kräv admin",
+                        value=True if (module.requires_admin or is_admin_locked) else is_admin_required,
+                        key=f"toggle_module_admin_req_{module.key}",
+                        disabled=bool(module.requires_admin or is_admin_locked),
+                    )
+                if is_admin_locked:
+                    st.caption("Admin-modulen är alltid aktiv och kan inte stängas av.")
+                elif module.requires_admin:
+                    st.caption(f"{module.name} kräver alltid adminbehörighet.")
+
+            st.markdown("**Modulordning i sidomenyn**")
+            st.caption("Flytta moduler upp eller ner för att bestämma visningsordning.")
+            for index, module_key in enumerate(ordered_module_keys):
+                module = modules_by_key[module_key]
+                move_col, up_col, down_col = st.columns([3, 1, 1])
+                move_col.write(f"{index + 1}. {module.name}")
+                with up_col:
+                    if st.button("Upp", key=f"module_order_up_{module_key}", disabled=index == 0):
+                        ordered_module_keys[index - 1], ordered_module_keys[index] = (
+                            ordered_module_keys[index],
+                            ordered_module_keys[index - 1],
+                        )
+                        st.session_state[order_state_key] = ordered_module_keys
+                        st.rerun()
+                with down_col:
+                    if st.button(
+                        "Ner",
+                        key=f"module_order_down_{module_key}",
+                        disabled=index == len(ordered_module_keys) - 1,
+                    ):
+                        ordered_module_keys[index + 1], ordered_module_keys[index] = (
+                            ordered_module_keys[index],
+                            ordered_module_keys[index + 1],
+                        )
+                        st.session_state[order_state_key] = ordered_module_keys
+                        st.rerun()
+            st.caption("Ställ in om modul ska vara aktiv och om den ska kräva adminbehörighet.")
+            reset_order_col, _ = st.columns([1, 3])
+            with reset_order_col:
+                if st.button("Återställ standardordning", key="reset_module_order"):
+                    st.session_state[order_state_key] = list(default_order)
+                    st.rerun()
+            if st.button("Spara modulinställningar", key="admin_save_module_settings"):
+                new_disabled = [
+                    module.key
+                    for module in all_modules
+                    if module.key != "admin" and not bool(module_enabled_by_key.get(module.key, True))
+                ]
+                new_admin_required = [
+                    module.key
+                    for module in all_modules
+                    if module.key == "admin"
+                    or module.requires_admin
+                    or bool(module_admin_required_by_key.get(module.key, False))
+                ]
+                settings.update_one(
+                    {"_id": "modules"},
+                    {
+                        "$set": {
+                            "disabled_keys": new_disabled,
+                            "admin_required_keys": sorted(set(new_admin_required)),
+                            "module_order_keys": list(st.session_state.get(order_state_key, default_order)),
+                            "updated_by": current_user,
+                            "updated_at": utc_now(),
+                        }
+                    },
+                    upsert=True,
+                )
+                st.success("Modulinställningar uppdaterade.")
+                st.rerun()
+
+    with admin_col2:
+        with st.expander("**Välkommen-modul**"):
+            welcome_doc = settings.find_one(
+                {"_id": "welcome_content"},
+                {"title": 1, "body": 1, "image_b64": 1, "image_mime": 1},
+            ) or {}
+            with st.form("admin_welcome_content"):
+                welcome_title = st.text_input(
+                    "Titel",
+                    value=str(welcome_doc.get("title", "Välkommen")),
+                )
+                welcome_body = st.text_area(
+                    "Brödtext",
+                    value=str(welcome_doc.get("body", "Detta är din arbetsyta för vandringsplanering.")),
+                    height=120,
+                )
+                uploaded_image = st.file_uploader(
+                    "Ladda upp bild (valfritt)",
+                    type=["png", "jpg", "jpeg", "webp"],
+                )
+                remove_image = st.checkbox("Ta bort befintlig bild", value=False)
+                save_welcome = st.form_submit_button("Spara välkommen-innehåll")
+
+            if save_welcome:
+                updates = {
+                    "title": welcome_title.strip() or "Välkommen",
+                    "body": welcome_body.strip() or "Detta är din arbetsyta för vandringsplanering.",
                     "updated_by": current_user,
                     "updated_at": utc_now(),
                 }
-            },
-            upsert=True,
-        )
-        st.success("Modulinställningar uppdaterade.")
-        st.rerun()
-
-    st.markdown("### Välkommen-modul")
-    welcome_doc = settings.find_one(
-        {"_id": "welcome_content"},
-        {"title": 1, "body": 1, "image_b64": 1, "image_mime": 1},
-    ) or {}
-    with st.form("admin_welcome_content"):
-        welcome_title = st.text_input(
-            "Titel",
-            value=str(welcome_doc.get("title", "Välkommen")),
-        )
-        welcome_body = st.text_area(
-            "Brödtext",
-            value=str(welcome_doc.get("body", "Detta är din arbetsyta för vandringsplanering.")),
-            height=120,
-        )
-        uploaded_image = st.file_uploader(
-            "Ladda upp bild (valfritt)",
-            type=["png", "jpg", "jpeg", "webp"],
-        )
-        remove_image = st.checkbox(
-            "Ta bort befintlig bild",
-            value=False,
-        )
-        save_welcome = st.form_submit_button("Spara välkommen-innehåll")
-
-    if save_welcome:
-        updates = {
-            "title": welcome_title.strip() or "Välkommen",
-            "body": welcome_body.strip() or "Detta är din arbetsyta för vandringsplanering.",
-            "updated_by": current_user,
-            "updated_at": utc_now(),
-        }
-        if remove_image:
-            updates["image_b64"] = ""
-            updates["image_mime"] = ""
-        elif uploaded_image is not None:
-            image_bytes = uploaded_image.read()
-            if not image_bytes:
-                st.error("Uppladdad bild verkar vara tom.")
-            else:
-                updates["image_b64"] = base64.b64encode(image_bytes).decode("ascii")
-                updates["image_mime"] = str(uploaded_image.type or "")
-        settings.update_one(
-            {"_id": "welcome_content"},
-            {"$set": updates},
-            upsert=True,
-        )
-        st.success("Välkommen-modulen uppdaterad.")
-        st.rerun()
-
-    st.markdown("### Användarhantering")
-    with st.form("admin_create_user", clear_on_submit=True):
-        st.markdown("**Skapa ny användare**")
-        create_username = st.text_input("Nytt användarnamn")
-        create_password = st.text_input("Nytt lösenord", type="password")
-        create_is_admin = st.checkbox("Skapa som administratör")
-        create_submit = st.form_submit_button("Skapa användare")
-
-    if create_submit:
-        normalized_username = _normalize_username(create_username)
-        if len(normalized_username) < 3:
-            st.error("Användarnamn måste vara minst 3 tecken.")
-        elif len(create_password) < 8:
-            st.error("Lösenord måste vara minst 8 tecken.")
-        elif users.find_one({"username": normalized_username}, {"_id": 1}):
-            st.error("Användarnamnet finns redan.")
-        else:
-            users.insert_one(
-                {
-                    "username": normalized_username,
-                    "password_hash": hash_password(create_password),
-                    "is_admin": bool(create_is_admin),
-                    "created_at": utc_now(),
-                    "updated_at": utc_now(),
-                }
-            )
-            st.success("Användare skapad.")
-            st.rerun()
-
-    user_docs = list(users.find({}, {"username": 1, "is_admin": 1, "created_at": 1}).sort("username", 1))
-    if not user_docs:
-        st.info("Inga användare hittades.")
-        return
-
-    st.markdown("### Systemöversikt")
-    metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
-    metrics_col1.metric("Användare", users.count_documents({}))
-    metrics_col2.metric("Admins", users.count_documents({"is_admin": True}))
-    metrics_col3.metric(
-        "Registrering",
-        "På" if registration_enabled else "Av",
-    )
-
-    for user_doc in user_docs:
-        username = user_doc.get("username", "")
-        with st.expander(f"Användare: {username}"):
-            new_username = st.text_input(
-                "Användarnamn",
-                value=username,
-                key=f"admin_username_{user_doc['_id']}",
-            )
-            new_password = st.text_input(
-                "Sätt nytt lösenord (lämna tomt för att behålla nuvarande)",
-                type="password",
-                key=f"admin_password_{user_doc['_id']}",
-            )
-            promote_admin = st.checkbox(
-                "Administratörsanvändare",
-                value=bool(user_doc.get("is_admin", False)),
-                key=f"admin_flag_{user_doc['_id']}",
-            )
-            save_col, delete_col = st.columns(2)
-            with save_col:
-                if st.button("Spara användarändringar", key=f"admin_save_user_{user_doc['_id']}"):
-                    normalized_username = _normalize_username(new_username)
-                    if len(normalized_username) < 3:
-                        st.error("Användarnamn måste vara minst 3 tecken.")
+                if remove_image:
+                    updates["image_b64"] = ""
+                    updates["image_mime"] = ""
+                elif uploaded_image is not None:
+                    image_bytes = uploaded_image.read()
+                    if not image_bytes:
+                        st.error("Uppladdad bild verkar vara tom.")
                     else:
-                        duplicate = users.find_one(
-                            {"username": normalized_username, "_id": {"$ne": user_doc["_id"]}},
-                            {"_id": 1},
-                        )
-                        if duplicate:
-                            st.error("Användarnamnet finns redan.")
-                        else:
-                            updates = {
-                                "username": normalized_username,
-                                "is_admin": bool(promote_admin),
-                                "updated_at": utc_now(),
-                            }
-                            if new_password:
-                                if len(new_password) < 8:
-                                    st.error("Lösenord måste vara minst 8 tecken.")
-                                    return
-                                updates["password_hash"] = hash_password(new_password)
-                            users.update_one({"_id": user_doc["_id"]}, {"$set": updates})
-                            st.success("Användare uppdaterad.")
-                            st.rerun()
-            with delete_col:
-                if st.button(
-                    "Radera användare",
-                    key=f"admin_delete_user_{user_doc['_id']}",
-                    type="primary",
-                    disabled=username == current_user,
-                ):
-                    users.delete_one({"_id": user_doc["_id"]})
-                    st.warning("Användare raderad.")
+                        updates["image_b64"] = base64.b64encode(image_bytes).decode("ascii")
+                        updates["image_mime"] = str(uploaded_image.type or "")
+                settings.update_one(
+                    {"_id": "welcome_content"},
+                    {"$set": updates},
+                    upsert=True,
+                )
+                st.success("Välkommen-modulen uppdaterad.")
+                st.rerun()
+
+    with admin_col3:
+        with st.expander("**Användarhantering**"):
+            with st.form("admin_create_user", clear_on_submit=True):
+                st.markdown("**Skapa ny användare**")
+                create_username = st.text_input("Nytt användarnamn")
+                create_password = st.text_input("Nytt lösenord", type="password")
+                create_is_admin = st.checkbox("Skapa som administratör")
+                create_submit = st.form_submit_button("Skapa användare")
+
+            if create_submit:
+                normalized_username = _normalize_username(create_username)
+                if len(normalized_username) < 3:
+                    st.error("Användarnamn måste vara minst 3 tecken.")
+                elif len(create_password) < 8:
+                    st.error("Lösenord måste vara minst 8 tecken.")
+                elif users.find_one({"username": normalized_username}, {"_id": 1}):
+                    st.error("Användarnamnet finns redan.")
+                else:
+                    users.insert_one(
+                        {
+                            "username": normalized_username,
+                            "password_hash": hash_password(create_password),
+                            "is_admin": bool(create_is_admin),
+                            "created_at": utc_now(),
+                            "updated_at": utc_now(),
+                        }
+                    )
+                    st.success("Användare skapad.")
                     st.rerun()
+
+            user_docs = list(
+                users.find({}, {"username": 1, "is_admin": 1, "created_at": 1}).sort("username", 1)
+            )
+            if not user_docs:
+                st.info("Inga användare hittades.")
+                return
+
+            st.markdown("### Systemöversikt")
+            metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
+            metrics_col1.metric("Användare", users.count_documents({}))
+            metrics_col2.metric("Admins", users.count_documents({"is_admin": True}))
+            metrics_col3.metric("Registrering", "På" if registration_enabled else "Av")
+
+            for user_doc in user_docs:
+                username = user_doc.get("username", "")
+                with st.expander(f"Användare: {username}"):
+                    new_username = st.text_input(
+                        "Användarnamn",
+                        value=username,
+                        key=f"admin_username_{user_doc['_id']}",
+                    )
+                    new_password = st.text_input(
+                        "Sätt nytt lösenord (lämna tomt för att behålla nuvarande)",
+                        type="password",
+                        key=f"admin_password_{user_doc['_id']}",
+                    )
+                    promote_admin = st.checkbox(
+                        "Administratörsanvändare",
+                        value=bool(user_doc.get("is_admin", False)),
+                        key=f"admin_flag_{user_doc['_id']}",
+                    )
+                    save_col, delete_col = st.columns(2)
+                    with save_col:
+                        if st.button("Spara användarändringar", key=f"admin_save_user_{user_doc['_id']}"):
+                            normalized_username = _normalize_username(new_username)
+                            if len(normalized_username) < 3:
+                                st.error("Användarnamn måste vara minst 3 tecken.")
+                            else:
+                                duplicate = users.find_one(
+                                    {"username": normalized_username, "_id": {"$ne": user_doc["_id"]}},
+                                    {"_id": 1},
+                                )
+                                if duplicate:
+                                    st.error("Användarnamnet finns redan.")
+                                else:
+                                    updates = {
+                                        "username": normalized_username,
+                                        "is_admin": bool(promote_admin),
+                                        "updated_at": utc_now(),
+                                    }
+                                    if new_password:
+                                        if len(new_password) < 8:
+                                            st.error("Lösenord måste vara minst 8 tecken.")
+                                            return
+                                        updates["password_hash"] = hash_password(new_password)
+                                    users.update_one({"_id": user_doc["_id"]}, {"$set": updates})
+                                    st.success("Användare uppdaterad.")
+                                    st.rerun()
+                    with delete_col:
+                        if st.button(
+                            "Radera användare",
+                            key=f"admin_delete_user_{user_doc['_id']}",
+                            type="primary",
+                            disabled=username == current_user,
+                        ):
+                            users.delete_one({"_id": user_doc["_id"]})
+                            st.warning("Användare raderad.")
+                            st.rerun()
 
 
 def get_module() -> AppModule:
