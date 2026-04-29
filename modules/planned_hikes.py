@@ -360,6 +360,38 @@ def _assignment_totals(hike: dict) -> dict[tuple[str, str], int]:
     return totals
 
 
+def _assignment_weight_by_participant(hike: dict) -> dict[str, int]:
+    """Return carried weight in grams per borrower from hike assignments."""
+    assignments = list(hike.get("gear_assignments", []) or [])
+    if not assignments:
+        return {}
+
+    gear = get_collection("gear_items")
+    weight_lookup: dict[tuple[str, str], int] = {}
+    for assignment in assignments:
+        lender = str(assignment.get("lender", "")).strip()
+        item_id = str(assignment.get("item_id", "")).strip()
+        if not lender or not item_id:
+            continue
+        key = (lender, item_id)
+        if key in weight_lookup:
+            continue
+        doc = gear.find_one({"owner": lender, "item_id": item_id}, {"weight_g": 1})
+        weight_lookup[key] = int(doc.get("weight_g", 0)) if doc else 0
+
+    result: dict[str, int] = {}
+    for assignment in assignments:
+        borrower = str(assignment.get("borrower", "")).strip()
+        lender = str(assignment.get("lender", "")).strip()
+        item_id = str(assignment.get("item_id", "")).strip()
+        quantity = int(assignment.get("quantity", 0) or 0)
+        if not borrower or quantity <= 0:
+            continue
+        item_weight_g = weight_lookup.get((lender, item_id), 0)
+        result[borrower] = result.get(borrower, 0) + (item_weight_g * quantity)
+    return result
+
+
 def _assignment_line(assignment: dict) -> str:
     """Build human-readable assignment text with owned/borrowed/shared marker."""
     lender = assignment.get("lender", "?")
@@ -1176,6 +1208,7 @@ def _render_hike_checklist(hike: dict, current_user: str, collection) -> None:
     overview_cols[5].metric("Påbörjade", started_items)
 
     st.markdown("**Snabböversikt per användare**")
+    participant_weight_g = _assignment_weight_by_participant(hike)
     for participant in participants:
         done_count = 0
         required_count = 0
@@ -1206,7 +1239,8 @@ def _render_hike_checklist(hike: dict, current_user: str, collection) -> None:
         st.write(
             f"- {participant}: packed {done_count}/{required_count}, "
             f"borrowed qty {borrowed_qty}, shared qty {shared_qty}, "
-            f"missing checks {max(0, required_count - done_count)}"
+            f"missing checks {max(0, required_count - done_count)}, "
+            f"total vikt {participant_weight_g.get(participant, 0) / 1000:.2f} kg"
         )
 
     st.caption(

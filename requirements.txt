@@ -4,3 +4,4 @@ dnspython
 requests
 folium
 streamlit-folium
+plotly

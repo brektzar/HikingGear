@@ -710,6 +710,9 @@ def render_sidebar_pages(modules: list) -> str:
             type="primary" if is_selected else "secondary",
             use_container_width=True,
         ):
+            if module_key != selected_key:
+                st.session_state.page_nav_key = module_key
+                st.rerun()
             selected_key = module_key
 
     st.session_state.page_nav_key = selected_key
