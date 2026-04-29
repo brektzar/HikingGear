@@ -340,6 +340,7 @@ def _render_geojson_map(geojson_data: dict[str, Any], map_key: str) -> None:
             key=map_key,
             height=640,
             use_container_width=True,
+            returned_objects=[],
         )
 
 
