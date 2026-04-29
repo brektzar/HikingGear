@@ -7,6 +7,7 @@ from .base import AppModule
 from .bug_tracker import get_module as get_bug_tracker_module
 from .checklist_item_types import get_module as get_checklist_item_types_module
 from .checklists import get_module as get_checklists_module
+from .completed_hikes import get_module as get_completed_hikes_module
 from .gear import get_module as get_gear_module
 from .planned_hikes import get_module as get_planned_hikes_module
 from .stats import get_module as get_stats_module
@@ -28,6 +29,7 @@ def load_modules() -> List[AppModule]:
         get_checklists_module(),
         get_trails_module(),
         get_planned_hikes_module(),
+        get_completed_hikes_module(),
         get_gear_module(),
         get_stats_module(),
     ]

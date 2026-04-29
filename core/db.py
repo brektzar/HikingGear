@@ -101,6 +101,7 @@ def ensure_indexes() -> None:
     bug_reports.create_index([("reporter", ASCENDING), ("updated_at", ASCENDING)])
     bug_reports.create_index([("status", ASCENDING), ("updated_at", ASCENDING)])
     bug_reports.create_index([("bug_id", ASCENDING)], unique=True)
+    planned_hikes.create_index([("status", ASCENDING), ("updated_at", ASCENDING)])
 
 
 def ping_database() -> tuple[bool, str]:

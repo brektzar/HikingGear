@@ -96,62 +96,70 @@ def render(current_user: str) -> None:
     )
 
     with module_tab:
-        for module_key in ordered_module_keys:
-            module = modules_by_key[module_key]
-            is_admin_locked = module.key == "admin"
-            is_admin_required = bool(module.requires_admin or module.key in admin_required_keys)
-            row_col1, row_col2 = st.columns([2, 1])
-            with row_col1:
-                module_enabled_by_key[module.key] = st.checkbox(
-                    f"{module.name}",
-                    value=True if is_admin_locked else module.key not in disabled_keys,
-                    key=f"toggle_module_{module.key}",
-                    disabled=is_admin_locked,
-                )
-            with row_col2:
-                module_admin_required_by_key[module.key] = st.checkbox(
-                    "Kräv admin",
-                    value=True if (module.requires_admin or is_admin_locked) else is_admin_required,
-                    key=f"toggle_module_admin_req_{module.key}",
-                    disabled=bool(module.requires_admin or is_admin_locked),
-                )
-            if is_admin_locked:
-                st.caption("Admin-modulen är alltid aktiv och kan inte stängas av.")
-            elif module.requires_admin:
-                st.caption(f"{module.name} kräver alltid adminbehörighet.")
+        settings_col, order_col = st.columns([1, 1], gap="small")
 
-        st.markdown("**Modulordning i sidomenyn**")
-        st.caption("Flytta moduler upp eller ner för att bestämma visningsordning.")
-        for index, module_key in enumerate(ordered_module_keys):
-            module = modules_by_key[module_key]
-            move_col, up_col, down_col = st.columns([3, 1, 1])
-            move_col.write(f"{index + 1}. {module.name}")
-            with up_col:
-                if st.button("Upp", key=f"module_order_up_{module_key}", disabled=index == 0):
-                    ordered_module_keys[index - 1], ordered_module_keys[index] = (
-                        ordered_module_keys[index],
-                        ordered_module_keys[index - 1],
+        with settings_col:
+            st.markdown("**Modulval**")
+            st.caption("Ställ in om modul ska vara aktiv och om den ska kräva adminbehörighet.")
+            for index, module_key in enumerate(ordered_module_keys):
+                module = modules_by_key[module_key]
+                is_admin_locked = module.key == "admin"
+                is_admin_required = bool(module.requires_admin or module.key in admin_required_keys)
+                row_col1, row_col2 = st.columns([2, 1], gap="small")
+                with row_col1:
+                    module_enabled_by_key[module.key] = st.checkbox(
+                        f"{module.name}",
+                        value=True if is_admin_locked else module.key not in disabled_keys,
+                        key=f"toggle_module_{module.key}",
+                        disabled=is_admin_locked,
                     )
-                    st.session_state[order_state_key] = ordered_module_keys
-                    st.rerun()
-            with down_col:
-                if st.button(
-                    "Ner",
-                    key=f"module_order_down_{module_key}",
-                    disabled=index == len(ordered_module_keys) - 1,
-                ):
-                    ordered_module_keys[index + 1], ordered_module_keys[index] = (
-                        ordered_module_keys[index],
-                        ordered_module_keys[index + 1],
+                with row_col2:
+                    module_admin_required_by_key[module.key] = st.checkbox(
+                        "Kräv admin",
+                        value=True if (module.requires_admin or is_admin_locked) else is_admin_required,
+                        key=f"toggle_module_admin_req_{module.key}",
+                        disabled=bool(module.requires_admin or is_admin_locked),
                     )
-                    st.session_state[order_state_key] = ordered_module_keys
-                    st.rerun()
-        st.caption("Ställ in om modul ska vara aktiv och om den ska kräva adminbehörighet.")
-        reset_order_col, _ = st.columns([1, 3])
-        with reset_order_col:
+                if is_admin_locked:
+                    st.caption("Admin-modulen är alltid aktiv och kan inte stängas av.")
+                elif module.requires_admin:
+                    st.caption(f"{module.name} kräver alltid adminbehörighet.")
+                if index < len(ordered_module_keys) - 1:
+                    st.divider()
+
+        with order_col:
+            st.markdown("**Modulordning**")
+            st.caption("Flytta moduler upp eller ner för att bestämma visningsordning.")
+            for index, module_key in enumerate(ordered_module_keys):
+                module = modules_by_key[module_key]
+                move_col, up_col, down_col = st.columns([3, 1, 1], gap="small")
+                move_col.write(f"{index + 1}. {module.name}")
+                with up_col:
+                    if st.button("Upp", key=f"module_order_up_{module_key}", disabled=index == 0):
+                        ordered_module_keys[index - 1], ordered_module_keys[index] = (
+                            ordered_module_keys[index],
+                            ordered_module_keys[index - 1],
+                        )
+                        st.session_state[order_state_key] = ordered_module_keys
+                        st.rerun()
+                if index < len(ordered_module_keys) - 1:
+                    st.divider()
+                with down_col:
+                    if st.button(
+                        "Ner",
+                        key=f"module_order_down_{module_key}",
+                        disabled=index == len(ordered_module_keys) - 1,
+                    ):
+                        ordered_module_keys[index + 1], ordered_module_keys[index] = (
+                            ordered_module_keys[index],
+                            ordered_module_keys[index + 1],
+                        )
+                        st.session_state[order_state_key] = ordered_module_keys
+                        st.rerun()
             if st.button("Återställ standardordning", key="reset_module_order"):
                 st.session_state[order_state_key] = list(default_order)
                 st.rerun()
+
         if st.button("Spara modulinställningar", key="admin_save_module_settings"):
             new_disabled = [
                 module.key

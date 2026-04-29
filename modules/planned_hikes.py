@@ -143,6 +143,14 @@ def _geojson_trail_lengths_km(geojson_data: dict[str, Any]) -> dict[str, float]:
     return per_trail_km
 
 
+def _selected_trails_total_km(per_trail_km: dict[str, float], selected_titles: list[str]) -> float:
+    """Return summed length in km for selected trail titles."""
+    total = 0.0
+    for title in selected_titles:
+        total += float(per_trail_km.get(title, 0.0))
+    return total
+
+
 def _extract_lon_lat_pairs(value: Any) -> list[tuple[float, float]]:
     """Extract [lon, lat] pairs from nested GeoJSON coordinates."""
     coords: list[tuple[float, float]] = []
@@ -1274,6 +1282,7 @@ def render(current_user: str) -> None:
                         "gear_assignments": [],
                         "borrow_requests": [],
                         "participant_checks": [],
+                        "status": "planned",
                         "created_at": utc_now(),
                         "updated_at": utc_now(),
                     }
@@ -1479,12 +1488,14 @@ def render(current_user: str) -> None:
                             except Exception:
                                 st.error("Kunde inte läsa filen. Kontrollera att det är giltig GeoJSON.")
                             else:
+                                parsed_trail_titles = list(_geojson_trail_lengths_km(parsed_geojson).keys())
                                 collection.update_one(
                                     {"_id": hike["_id"]},
                                     {
                                         "$set": {
                                             "route_geojson": parsed_geojson,
                                             "route_geojson_name": str(uploaded_geojson.name or "route.geojson"),
+                                            "main_route_titles": parsed_trail_titles,
                                             "updated_at": utc_now(),
                                         }
                                     },
@@ -1510,6 +1521,7 @@ def render(current_user: str) -> None:
                                 "$set": {
                                     "route_geojson": None,
                                     "route_geojson_name": "",
+                                            "main_route_titles": [],
                                     "updated_at": utc_now(),
                                 }
                             },
@@ -1522,6 +1534,40 @@ def render(current_user: str) -> None:
                         )
                         st.info("GeoJSON-led borttagen.")
                         st.rerun()
+
+                    existing_geojson = hike.get("route_geojson")
+                    if existing_geojson:
+                        trail_options = list(_geojson_trail_lengths_km(existing_geojson).keys())
+                        if trail_options:
+                            saved_main_titles = [
+                                str(title) for title in hike.get("main_route_titles", []) if str(title) in trail_options
+                            ]
+                            default_main_titles = saved_main_titles if saved_main_titles else trail_options
+                            selected_main_titles = st.multiselect(
+                                "Välj huvudled(er) för distansberäkning",
+                                trail_options,
+                                default=default_main_titles,
+                                key=f"main_route_titles_{hike['_id']}",
+                            )
+                            if st.button("Spara huvudled-val", key=f"save_main_route_titles_{hike['_id']}"):
+                                collection.update_one(
+                                    {"_id": hike["_id"]},
+                                    {
+                                        "$set": {
+                                            "main_route_titles": selected_main_titles,
+                                            "updated_at": utc_now(),
+                                        }
+                                    },
+                                )
+                                log_activity(
+                                    current_user,
+                                    "update_main_route_selection",
+                                    module="planned_hikes",
+                                    target=str(hike.get("title", "")),
+                                    details={"selected_routes": selected_main_titles},
+                                )
+                                st.success("Huvudled-val sparat.")
+                                st.rerun()
                 if hike.get("notes"):
                     st.caption(hike["notes"])
 
@@ -1557,8 +1603,19 @@ def render(current_user: str) -> None:
                 else:
                     total_route_km, per_category_km = _geojson_route_lengths_km(stored_geojson)
                     per_trail_km = _geojson_trail_lengths_km(stored_geojson)
+                    selected_main_titles = [
+                        str(title) for title in hike.get("main_route_titles", []) if str(title) in per_trail_km
+                    ]
+                    selected_main_km = _selected_trails_total_km(per_trail_km, selected_main_titles)
                     if total_route_km > 0:
-                        st.metric("Total ledlängd (GeoJSON)", f"{total_route_km:.2f} km")
+                        metric_col1, metric_col2 = st.columns(2)
+                        metric_col1.metric("Total ledlängd (GeoJSON)", f"{total_route_km:.2f} km")
+                        metric_col2.metric(
+                            "Vald huvudledslängd",
+                            f"{selected_main_km:.2f} km" if selected_main_titles else "Ej vald",
+                        )
+                        if selected_main_titles:
+                            st.caption("Huvudleder: " + ", ".join(selected_main_titles))
                         if per_category_km or per_trail_km:
                             col_category, col_trails = st.columns(2)
                             with col_category:
