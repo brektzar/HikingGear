@@ -11,7 +11,7 @@ from uuid import uuid4
 
 import folium
 import streamlit as st
-from streamlit_folium import st_folium
+import streamlit.components.v1 as components
 
 from core.auth import is_admin, list_usernames
 from core.activity_log import log_activity
@@ -335,13 +335,8 @@ def _render_geojson_map(geojson_data: dict[str, Any], map_key: str) -> None:
 
     folium.LayerControl(collapsed=True).add_to(folium_map)
     with st.container(border=True):
-        st_folium(
-            folium_map,
-            key=map_key,
-            height=640,
-            use_container_width=True,
-            returned_objects=[],
-        )
+        map_html = folium_map.get_root().render()
+        components.html(map_html, height=640, scrolling=False)
 
 
 def _assignment_totals(hike: dict) -> dict[tuple[str, str], int]:
