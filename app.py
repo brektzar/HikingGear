@@ -3,6 +3,7 @@
 import streamlit as st
 
 from core.auth import authenticate_user, is_admin, register_user
+from core.activity_log import log_activity
 from core.db import ensure_indexes, get_collection, ping_database
 from modules.registry import load_modules
 
@@ -86,7 +87,7 @@ def apply_theme() -> None:
             --hg-skiffergra: #5A5A5A;
 
             --hg-bg: var(--hg-sandstrand);
-            --hg-paper: var(--hg-ljus-beige);
+            --hg-paper: var(--hg-mork-jord);
             --hg-forest: var(--hg-djup-skog);
             --hg-moss: var(--hg-mossig-skog);
             --hg-sand: var(--hg-solblekt-halm);
@@ -95,9 +96,9 @@ def apply_theme() -> None:
 
             --hg-overlay-forest: rgba(62, 77, 52, 0.10);
             --hg-overlay-moss: rgba(94, 110, 74, 0.18);
-            --hg-overlay-bark: rgba(107, 63, 42, 0.32);
+            --hg-overlay-bark: var(--hg-mork-jord);
             --hg-overlay-earth: rgba(58, 42, 31, 0.16);
-            --hg-overlay-paper: rgba(232, 220, 195, 0.88);
+            --hg-overlay-paper: var(--hg-mork-jord);
         }
 
         .stApp {
@@ -135,7 +136,7 @@ def apply_theme() -> None:
         .stApp [data-baseweb="input"] > div,
         .stApp [data-baseweb="textarea"] > div {
             background-color: var(--hg-sandstrand);
-            border: 1px solid var(--hg-varm-beige);
+            border: 1px solid var(--hg-mork-jord);
             border-radius: 10px;
             box-shadow: 0 1px 2px var(--hg-overlay-forest);
         }
@@ -167,7 +168,7 @@ def apply_theme() -> None:
         [data-testid="stToolbar"] button {
             color: var(--hg-text) ;
             background: var(--hg-sandstrand) ;
-            border: 1px solid var(--hg-varm-beige) ;
+            border: 1px solid var(--hg-mork-jord);
         }
 
         /*[data-testid="stHeader"] button svg,
@@ -187,7 +188,7 @@ def apply_theme() -> None:
 
         [data-testid="stToolbar"] button {
             background: var(--hg-sandstrand) ;
-            border: 1px solid var(--hg-varm-beige) ;
+            border: 1px solid var(--hg-mork-jord);
             color: var(--hg-text) ;
         }*/
 
@@ -241,10 +242,22 @@ def apply_theme() -> None:
 
         div[data-testid="stVerticalBlockBorderWrapper"] {
             border-radius: 14px;
-            border: 1px solid var(--hg-overlay-bark);
+            border: 1px solid var(--hg-mork-jord) !important;
+            border-color: var(--hg-mork-jord) !important;
             background: var(--hg-overlay-paper);
             box-shadow: 0 6px 18px var(--hg-overlay-forest);
             padding: 0.35rem 0.5rem;
+        }
+
+        /* Outermost module block inside main container */
+        .stMainBlockContainer > div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlock"] {
+            border: 2px solid var(--hg-mork-jord) !important;
+            border-color: var(--hg-mork-jord) !important;
+        }
+
+        .stMainBlockContainer .stForm {
+            border: 2px solid var(--hg-mork-jord) !important;
+            border-color: var(--hg-mork-jord) !important;
         }
 
         .hg-auth-shell {
@@ -253,7 +266,7 @@ def apply_theme() -> None:
             padding: 0.4rem;
             border-radius: 16px;
             background: linear-gradient(130deg, var(--hg-djup-skog) 0%, var(--hg-jordig-brun) 100%);
-            border: 1px solid var(--hg-sandstrand);
+            border: 1px solid var(--hg-mork-jord);
             box-shadow: 0 8px 20px var(--hg-overlay-forest);
         }
 
@@ -290,7 +303,7 @@ def apply_theme() -> None:
             background: linear-gradient(135deg, var(--hg-djup-skog) 0%, var(--hg-rostad-lera) 80%, var(--hg-gyllene-gul) 100%);
             color: var(--hg-sandstrand);
             border-radius: 16px;
-            border: 5px solid transparent;
+            border: 5px solid var(--hg-mork-jord);
             border-image: linear-gradient(135deg, var(--hg-jordig-brun) 0%, var(--hg-mossig-skog) 50%, var(--hg-djup-skog) 100%) 1;
             padding: 1.1rem 1.2rem;
             margin-bottom: 1rem;
@@ -343,7 +356,7 @@ def apply_theme() -> None:
 
         .stTabs [data-baseweb="tab"] {
             background: var(--hg-ljus-beige);
-            border: 1px solid var(--hg-overlay-bark);
+            border: 1px solid var(--hg-mork-jord);
             border-radius: 10px;
             padding: 0.35rem 0.85rem;
         }
@@ -355,7 +368,7 @@ def apply_theme() -> None:
 
         /* Separate expander styling (independent from card wrappers). */
         .stExpander {
-            border: 1px solid var(--hg-overlay-bark) ;
+            border: 1px solid var(--hg-mork-jord);
             border-radius: 12px ;
             background: var(--hg-overlay-paper) ;
             box-shadow: 0 4px 12px var(--hg-overlay-forest) ;
@@ -363,7 +376,7 @@ def apply_theme() -> None:
         }
 
         .stExpander details {
-            border: none ;
+            border: 1px solid var(--hg-mork-jord);
             border-radius: 12px ;
             background: transparent ;
         }
@@ -390,7 +403,7 @@ def apply_theme() -> None:
 
         /* Reusable gear/checklist cards */
         .gear-card {
-            border: 1px solid var(--hg-overlay-bark) !important;
+            border: 1px solid var(--hg-mork-jord);
             border-radius: 10px !important;
             padding: 0.6rem 0.7rem !important;
             margin-bottom: 0.65rem !important;
@@ -440,7 +453,7 @@ def apply_theme() -> None:
         .stApp hr,
         .stApp [data-testid="stDivider"],
         .stApp [role="separator"] {
-            border: none ;
+            border: var(--hg-mork-jord);
             border-top: 2px solid rgba(58, 42, 31, 0.6) ;
             opacity: 1 ;
             margin-top: 0.75rem ;
@@ -561,6 +574,7 @@ def init_session_state() -> None:
     st.session_state.setdefault("current_user", None)
     st.session_state.setdefault("db_ready", False)
     st.session_state.setdefault("last_module_key", None)
+    st.session_state.setdefault("last_logged_page_key", None)
 
 
 def get_disabled_module_keys() -> set[str]:
@@ -611,7 +625,9 @@ def render_user_sidebar() -> None:
     if is_admin(st.session_state.current_user):
         st.sidebar.markdown('<div class="hg-sidebar-note">Roll: Admin</div>', unsafe_allow_html=True)
     if st.sidebar.button("Logga ut"):
+        log_activity(st.session_state.current_user, "logout", module="auth")
         st.session_state.current_user = None
+        st.session_state.last_logged_page_key = None
         st.rerun()
 
 
@@ -641,9 +657,12 @@ def render_auth_main(registration_enabled: bool) -> None:
             if submitted:
                 result = authenticate_user(username, password)
                 if result.ok:
-                    st.session_state.current_user = username.strip().lower()
+                    normalized_username = username.strip().lower()
+                    st.session_state.current_user = normalized_username
+                    log_activity(normalized_username, "login_success", module="auth")
                     st.success("Inloggad.")
                     st.rerun()
+                log_activity(username.strip().lower(), "login_failed", module="auth")
                 st.error(result.message)
 
     if register_tab is not None:
@@ -659,8 +678,15 @@ def render_auth_main(registration_enabled: bool) -> None:
                     else:
                         result = register_user(username, password)
                         if result.ok:
+                            log_activity(username.strip().lower(), "register_success", module="auth")
                             st.success(result.message)
                         else:
+                            log_activity(
+                                username.strip().lower(),
+                                "register_failed",
+                                module="auth",
+                                details={"reason": result.message},
+                            )
                             st.error(result.message)
     else:
         st.info("Registrering är för närvarande avstängd av administratör.")
@@ -754,10 +780,27 @@ def main() -> None:
         st.error("Den här modulen är avstängd av administratören.")
         return
     st.session_state.last_module_key = selected_key
+    if st.session_state.get("last_logged_page_key") != selected_key:
+        log_activity(
+            st.session_state.current_user,
+            "view_module",
+            module=selected_key,
+            target=module.name if module else selected_key,
+        )
+        st.session_state.last_logged_page_key = selected_key
     with st.container(border=True):
         if module.description:
             st.caption(module.description)
         module.render(st.session_state.current_user)
+
+    st.divider()
+    bug_module_available = "bug_tracker" in key_to_module
+    if st.button("Rapportera Buggar", use_container_width=True, key="global_report_bug_button"):
+        if bug_module_available:
+            st.session_state.page_nav_key = "bug_tracker"
+            st.rerun()
+        else:
+            st.warning("Bugtracker-modulen är för närvarande avstängd av administratören.")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from typing import Any
 import streamlit as st
 
 from core.auth import is_admin, list_usernames
+from core.activity_log import log_activity
 from core.db import get_collection, utc_now
 from .base import AppModule
 from .checklist_item_types import seed_default_item_types
@@ -116,6 +117,12 @@ def render(current_user: str) -> None:
                         "updated_at": utc_now(),
                     }
                     inserted = item_types_collection.insert_one(created_type)
+                    log_activity(
+                        current_user,
+                        "create_item_type_from_checklist",
+                        module="checklists",
+                        target=normalized_new_type_name,
+                    )
                     selected_types.append({**created_type, "_id": inserted.inserted_id})
 
             if not selected_types:
@@ -160,6 +167,13 @@ def render(current_user: str) -> None:
                     "updated_at": utc_now(),
                 }
             )
+            log_activity(
+                current_user,
+                "create_checklist",
+                module="checklists",
+                target=title.strip(),
+                details={"linked_trails": len(linked_trails), "item_types": len(checklist_item_types)},
+            )
             st.success("Checklista sparad.")
 
     st.divider()
@@ -199,6 +213,13 @@ def render(current_user: str) -> None:
                             }
                         },
                     )
+                    log_activity(
+                        current_user,
+                        "toggle_checklist_item_done",
+                        module="checklists",
+                        target=str(doc.get("title", "")),
+                        details={"item": item.get("text", ""), "done": bool(checked)},
+                    )
                     st.rerun()
 
             #checklist_item_types = doc.get("item_types", [])
@@ -237,6 +258,12 @@ def render(current_user: str) -> None:
                         {"_id": doc["_id"]},
                         {"$set": {"title": edited_title.strip(), "notes": edited_notes.strip(), "updated_at": utc_now()}},
                     )
+                    log_activity(
+                        current_user,
+                        "update_checklist",
+                        module="checklists",
+                        target=str(doc.get("title", "")),
+                    )
                     st.success("Checklista uppdaterad.")
                     st.rerun()
 
@@ -246,6 +273,12 @@ def render(current_user: str) -> None:
                 type="primary",
             ):
                 collection.delete_one({"_id": doc["_id"]})
+                log_activity(
+                    current_user,
+                    "delete_checklist",
+                    module="checklists",
+                    target=str(doc.get("title", "")),
+                )
                 st.rerun()
 
 

@@ -7,6 +7,7 @@ from uuid import uuid4
 import streamlit as st
 
 from core.auth import is_admin, list_usernames
+from core.activity_log import log_activity
 from core.db import get_collection, utc_now
 from .base import AppModule
 from .checklist_item_types import seed_default_item_types
@@ -164,12 +165,25 @@ def render(current_user: str) -> None:
                     "updated_at": utc_now(),
                 }
             )
+            log_activity(
+                current_user,
+                "create_gear_item",
+                module="gear",
+                target=item_name,
+                details={"category": item_category, "quantity": int(quantity)},
+            )
             st.success("Utrustning sparad.")
 
     with st.expander("Underhallsverktyg"):
         st.caption("Kör en gång för att normalisera äldre utrustning utan `item_id`.")
         if st.button("Migrera aldre utrustnings-ID", type="secondary"):
             migrated_count, generated_count = _migrate_legacy_item_ids(collection)
+            log_activity(
+                current_user,
+                "migrate_gear_item_ids",
+                module="gear",
+                details={"migrated_count": migrated_count, "generated_count": generated_count},
+            )
             if migrated_count == 0:
                 st.info("Inga äldre artiklar behövde migrering.")
             else:
@@ -264,6 +278,12 @@ def render(current_user: str) -> None:
                             }
                         },
                     )
+                    log_activity(
+                        current_user,
+                        "update_gear_item",
+                        module="gear",
+                        target=str(doc.get("name", "")),
+                    )
                     st.success("Utrustning uppdaterad.")
                     st.rerun()
 
@@ -279,6 +299,13 @@ def render(current_user: str) -> None:
                                 "updated_at": utc_now(),
                             }
                         },
+                    )
+                    log_activity(
+                        current_user,
+                        "toggle_gear_private",
+                        module="gear",
+                        target=str(doc.get("name", "")),
+                        details={"private_use_only": (not is_private)},
                     )
                     st.rerun()
 
@@ -298,6 +325,13 @@ def render(current_user: str) -> None:
                                     "updated_at": utc_now(),
                                 }
                             },
+                        )
+                        log_activity(
+                            current_user,
+                            "toggle_gear_hammock",
+                            module="gear",
+                            target=str(doc.get("name", "")),
+                            details={"shelter_is_hammock": (not is_hammock)},
                         )
                         st.rerun()
 
@@ -328,6 +362,13 @@ def render(current_user: str) -> None:
                             "updated_at": utc_now(),
                         }
                     )
+                    log_activity(
+                        current_user,
+                        "claim_gear_item",
+                        module="gear",
+                        target=str(doc.get("name", "")),
+                        details={"source_owner": str(doc.get("owner", ""))},
+                    )
                     st.success("Tillagd i din utrustning.")
                     st.rerun()
 
@@ -337,6 +378,12 @@ def render(current_user: str) -> None:
                 type="primary",
             ):
                 collection.delete_one({"_id": doc["_id"]})
+                log_activity(
+                    current_user,
+                    "delete_gear_item",
+                    module="gear",
+                    target=str(doc.get("name", "")),
+                )
                 st.rerun()
 
 

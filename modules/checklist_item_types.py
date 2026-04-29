@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from core.auth import is_admin
+from core.activity_log import log_activity
 from core.db import get_collection, utc_now
 from .base import AppModule
 
@@ -122,6 +123,13 @@ def render(current_user: str) -> None:
                         "updated_at": utc_now(),
                     }
                 )
+                log_activity(
+                    current_user,
+                    "create_item_type",
+                    module="checklist_item_types",
+                    target=normalized_name,
+                    details={"essential": bool(essential)},
+                )
                 st.success("Kategori tillagd.")
                 st.rerun()
 
@@ -180,6 +188,13 @@ def render(current_user: str) -> None:
                                     }
                                 },
                             )
+                            log_activity(
+                                current_user,
+                                "update_item_type",
+                                module="checklist_item_types",
+                                target=normalized_name,
+                                details={"essential": bool(new_essential)},
+                            )
                             st.success("Kategori uppdaterad.")
                             st.rerun()
             with delete_col:
@@ -188,6 +203,12 @@ def render(current_user: str) -> None:
                         st.error("Endast admins kan radera låsta standardtyper.")
                         continue
                     collection.delete_one({"_id": doc["_id"]})
+                    log_activity(
+                        current_user,
+                        "delete_item_type",
+                        module="checklist_item_types",
+                        target=str(doc.get("name", "")),
+                    )
                     st.info("Kategori borttagen.")
                     st.rerun()
 

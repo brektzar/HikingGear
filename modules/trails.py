@@ -7,6 +7,7 @@ from datetime import date
 import streamlit as st
 
 from core.auth import is_admin, list_usernames
+from core.activity_log import log_activity
 from core.db import get_collection, utc_now
 from .base import AppModule
 
@@ -47,6 +48,13 @@ def render(current_user: str) -> None:
                     "created_at": utc_now(),
                     "updated_at": utc_now(),
                 }
+            )
+            log_activity(
+                current_user,
+                "create_trail",
+                module="trails",
+                target=name.strip(),
+                details={"location": location.strip(), "status": status},
             )
             st.success("Led sparad.")
 
@@ -126,6 +134,12 @@ def render(current_user: str) -> None:
                             }
                         },
                     )
+                    log_activity(
+                        current_user,
+                        "update_trail",
+                        module="trails",
+                        target=edit_name.strip() or str(doc.get("name", "")),
+                    )
                     st.success("Led uppdaterad.")
                     st.rerun()
 
@@ -135,6 +149,12 @@ def render(current_user: str) -> None:
                 type="primary",
             ):
                 collection.delete_one({"_id": doc["_id"]})
+                log_activity(
+                    current_user,
+                    "delete_trail",
+                    module="trails",
+                    target=str(doc.get("name", "")),
+                )
                 st.rerun()
 
 

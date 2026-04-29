@@ -4,6 +4,7 @@ from typing import List
 
 from .admin import get_module as get_admin_module
 from .base import AppModule
+from .bug_tracker import get_module as get_bug_tracker_module
 from .checklist_item_types import get_module as get_checklist_item_types_module
 from .checklists import get_module as get_checklists_module
 from .gear import get_module as get_gear_module
@@ -21,6 +22,7 @@ def load_modules() -> List[AppModule]:
     """
     return [
         get_welcome_module(),
+        get_bug_tracker_module(),
         get_admin_module(),
         get_checklist_item_types_module(),
         get_checklists_module(),

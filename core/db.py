@@ -94,6 +94,13 @@ def ensure_indexes() -> None:
     gear_items.create_index([("owner", ASCENDING), ("item_id", ASCENDING)], unique=True)
     checklist_item_types = get_collection("checklist_item_types")
     checklist_item_types.create_index([("name_normalized", ASCENDING)], unique=True)
+    activity_logs = get_collection("activity_logs")
+    activity_logs.create_index([("actor", ASCENDING), ("event_at", ASCENDING)])
+    activity_logs.create_index([("action", ASCENDING), ("event_at", ASCENDING)])
+    bug_reports = get_collection("bug_reports")
+    bug_reports.create_index([("reporter", ASCENDING), ("updated_at", ASCENDING)])
+    bug_reports.create_index([("status", ASCENDING), ("updated_at", ASCENDING)])
+    bug_reports.create_index([("bug_id", ASCENDING)], unique=True)
 
 
 def ping_database() -> tuple[bool, str]:

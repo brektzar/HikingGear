@@ -2,3 +2,5 @@ streamlit
 pymongo
 dnspython
 requests
+folium
+streamlit-folium
